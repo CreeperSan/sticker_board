@@ -76,3 +76,9 @@ abstract class VersionManager {
 }
 
 class VersionManagerException(msg: String) : Exception(msg)
+
+class VersionManagerObject {
+    var versionName: String = ""
+    var versionCode: Int = 1
+    var upgradeTime: Long = 0
+}
