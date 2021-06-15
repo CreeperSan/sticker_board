@@ -36,4 +36,5 @@ build/
 .mvn
 
 ### Project File ###
+go.sum
 data/
