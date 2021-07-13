@@ -15,6 +15,14 @@ func Info(message ...interface{})  {
 	log.Println("【 Info  】", message)
 }
 
+func Success(message ...interface{})  {
+	log.Println("【Success】", message)
+}
+
+func Failure(message ...interface{})  {
+	log.Println("【Failure】", message)
+}
+
 func Warming(message ...interface{}) {
 	log.Println("【Warming】", message)
 }
