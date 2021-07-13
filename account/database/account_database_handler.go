@@ -12,7 +12,10 @@ import (
 	LogService "sticker_board/lib/log_service"
 	SharedPreferences "sticker_board/lib/shared_preferences"
 	"strings"
+	"time"
 )
+
+const _MAX_TOKEN_PER_ACCOUNT = 5
 
 var databaseName string = ""
 var databaseUsername string = ""
@@ -164,9 +167,9 @@ func LoginAccount(
 	// check whether the token count is out of range (maximum 5 tokens each account)
 	var queryTokenModelList []StickerBoardAccount.AccountTokenModel
 	queryTokenModelListResult := db.Where(StickerBoardAccount.ColumnAccountTokenModelAccountID+" = ?", queryAccountModel.ID).Order(StickerBoardAccount.ColumnAccountTokenModelUpdateTime+" desc").Find(&queryTokenModelList)
-	if queryTokenModelListResult.RowsAffected >= 5 {
+	if queryTokenModelListResult.RowsAffected >= _MAX_TOKEN_PER_ACCOUNT {
 		// remove the oldest token
-
+		db.Delete(queryTokenModelList[_MAX_TOKEN_PER_ACCOUNT - 1])
 	}
 
 	// create and insert new token
@@ -187,5 +190,39 @@ func LoginAccount(
 	db.Create(&insertAccountTokenModel)
 
 	return ActionResponse.CreateActionSuccessResponse()
+}
+
+func AuthToken(token string, platform int, brand string, deviceName string, machineCode string) ActionResponse.ActionResponse {
+	db := getDB()
+
+	var queryList []StickerBoardAccount.AccountTokenModel
+	queryListResult := db.Where(StickerBoardAccount.ColumnAccountTokenModelToken+" = ? and "+
+				StickerBoardAccount.ColumnAccountTokenModelPlatform + " = ? and " +
+				StickerBoardAccount.ColumnAccountTokenModelBrand + " = ? and " +
+				StickerBoardAccount.ColumnAccountTokenModelDeviceName + " = ? and " +
+				StickerBoardAccount.ColumnAccountTokenModelMachineCode + " = ?",
+		token, platform, brand, deviceName, machineCode,
+	).Order(StickerBoardAccount.ColumnAccountTokenModelUpdateTime+" desc").Limit(1).Find(&queryList)
+
+	// check whether the token exists
+	if queryListResult.RowsAffected >= 1 {
+		var tokenModel = queryList[0]
+		var currentTimestamp = time.Now().UnixNano() / 1000_000 // convert to millisecond
+		// check whether the token is expired
+		if currentTimestamp - tokenModel.UpdateTime > tokenModel.ExpireTimeMilliSecond {
+			// token is expired
+			db.Delete(tokenModel)
+			LogService.Success("Auth account failed, token expired. currentTimestamp =", currentTimestamp, " updateTimestamp =", tokenModel.UpdateTime, " expiredTimeMilliSecond =", tokenModel.ExpireTimeMilliSecond)
+			return ActionResponse.CreateActionFailResponse("Token was expired, please login.")
+		} else {
+			// token is not expired
+			tokenModel.UpdateTime = currentTimestamp
+			db.Save(tokenModel)
+			LogService.Success("Auth account success. token =", token)
+			return ActionResponse.CreateActionSuccessResponse()
+		}
+	}
+	LogService.Success("Auth account success. token not exist. token =", token)
+	return ActionResponse.CreateActionFailResponse("Token was expired, please login.")
 }
 

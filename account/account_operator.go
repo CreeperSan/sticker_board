@@ -23,5 +23,6 @@ func Init(){
 	//StickerBoardAccountDatabase.RegisterAccount("account", "123213121", "UserName", "7s29@email.com")
 	//StickerBoardAccountDatabase.RegisterAccount("account2", "12346578", "UserName2", "2@email.com")
 	//StickerBoardAccountDatabase.LoginAccount("account2", "12346578", StickerBoardAccount.PlatformUndefined, "test", "test", "test")
+	//StickerBoardAccountDatabase.AuthToken("5672aed2-e0c0-43a9-92b5-6bdcb9af5acc", StickerBoardAccount.PlatformUndefined, "test", "test", "test")
 	LogService.Info(StickerBoardAccount.TAG, "Initialized successful.")
 }
