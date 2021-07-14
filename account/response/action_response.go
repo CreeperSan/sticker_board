@@ -1,20 +1,20 @@
 package StickerBoardAccount
 
 type ActionResponse struct {
-	isSuccess bool
-	message string
+	Code    int
+	Message string
 }
 
 func CreateActionSuccessResponse() ActionResponse {
 	response := ActionResponse{}
-	response.isSuccess = true
-	response.message = "Operation successful."
+	response.Code = 200
+	response.Message = "Operation succeed."
 	return response
 }
 
 func CreateActionFailResponse(message string) ActionResponse {
 	response := ActionResponse{}
-	response.isSuccess = false
-	response.message = message
+	response.Code = 400
+	response.Message = message
 	return response
 }

@@ -4,11 +4,10 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"regexp"
-	"strings"
 )
 
 func CheckStringWithLength(content string, minLength int, maxLength int) bool {
-	contentLength := strings.Count(content, "")
+	contentLength := len(content)
 	if contentLength < minLength || contentLength > maxLength {
 		return false
 	}

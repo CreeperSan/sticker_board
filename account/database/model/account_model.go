@@ -21,6 +21,7 @@ type AccountModel struct {
 	RegisterTime 	int64		`gorm:"column:register_time; autoCreateTime:milli"`
 	Avatar 			string		`gorm:"column:avatar; "`
 	Email 			string		`gorm:"column:email; unique; not null"`
+	Type			int			`gorm:"column:type;not null;default 1"`
 }
 
 func (AccountModel) TableName() string {

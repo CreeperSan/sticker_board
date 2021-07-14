@@ -1,11 +1,12 @@
-package StickerBoardAccount
+package Account
 
 import (
 	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	StickerBoardAccount "sticker_board/account/database/model"
+	Account "sticker_board/account/database/model"
+	AccountResponse "sticker_board/account/database/response"
 	ActionResponse "sticker_board/account/response"
 	StickerBoard "sticker_board/application/const"
 	Formatter "sticker_board/lib/formatter"
@@ -14,6 +15,8 @@ import (
 	"strings"
 	"time"
 )
+
+// TODO : when using the same params to login should not only generate a new token but also delete the old token
 
 const _MAX_TOKEN_PER_ACCOUNT = 5
 
@@ -52,18 +55,21 @@ func Initialize()  {
 	db := getDB()
 
 	// Auto migrate -> Account Table
-	err := db.AutoMigrate(&StickerBoardAccount.AccountModel{})
+	err := db.AutoMigrate(&Account.AccountModel{})
 	if err != nil {
 		LogService.Error("Error occurred while auto migrating table : AccountModel.")
 		panic(err)
 	}
 
 	// Auto migrate -> Account Auth Table
-	err = db.AutoMigrate(&StickerBoardAccount.AccountTokenModel{})
+	err = db.AutoMigrate(&Account.AccountTokenModel{})
 	if err != nil {
 		LogService.Error("Error occurred while auto migrating table : AccountTokenModel.")
 		panic(err)
 	}
+
+	// remove all cached tokens
+	//db.Where("1 = 1").Delete(&Account.AccountTokenModel{})
 }
 
 func RegisterAccount(
@@ -107,21 +113,21 @@ func RegisterAccount(
 
 	var queryCount int64 = 0
 	// check account weather already been register
-	err := getDB().Model(&StickerBoardAccount.AccountModel{}).Where(StickerBoardAccount.ColumnAccountModelAccount+" = ?", account).Count(&queryCount)
+	err := getDB().Model(&Account.AccountModel{}).Where(Account.ColumnAccountModelAccount+" = ?", account).Count(&queryCount)
 	if queryCount > 0 {
 		LogService.Warming("Fail to register account, account already exist. account=",account," password=",password," userName=",userName," email=",email,".")
 		return ActionResponse.CreateActionFailResponse("Account already register, please login directly")
 	}
 
 	// check account weather already been register
-	err = getDB().Model(&StickerBoardAccount.AccountModel{}).Where(StickerBoardAccount.ColumnAccountModelEmail+" = ?", email).Count(&queryCount)
+	err = getDB().Model(&Account.AccountModel{}).Where(Account.ColumnAccountModelEmail+" = ?", email).Count(&queryCount)
 	if queryCount > 0 {
 		LogService.Warming("Fail to register account, email address already in used. account=",account," password=",password," userName=",userName," email=",email,".")
 		return ActionResponse.CreateActionFailResponse("Email already registered")
 	}
 
 	// insert user info to database
-	var accountModel = StickerBoardAccount.AccountModel{}
+	var accountModel = Account.AccountModel{}
 	accountModel.Account = account
 	accountModel.Password = password
 	accountModel.UserName = userName
@@ -136,7 +142,7 @@ func RegisterAccount(
 
 	LogService.Success("Account has been successfully registered. account =",account, " username =", userName, " email =", email)
 
-	response := ActionResponse.CreateActionFailResponse("todo")
+	response := ActionResponse.CreateActionSuccessResponse()
 	return response
 }
 
@@ -147,26 +153,29 @@ func LoginAccount(
 	brand string,
 	deviceName string,
 	machineCode string,
-) ActionResponse.ActionResponse {
+) AccountResponse.LoginDatabaseResponse {
 	account = strings.TrimSpace(account)
 	password = strings.TrimSpace(password)
 	password = Formatter.FormatPassword(password)
 
 	// check whether the account and database correct
-	var queryAccountModel = StickerBoardAccount.AccountModel{}
+	var queryAccountModel = Account.AccountModel{}
 	queryAccountModel.ID = 0
 	db := getDB()
-	db.Where(StickerBoardAccount.ColumnAccountModelAccount+" = ? and "+StickerBoardAccount.ColumnAccountModelPassword+" = ?", account, password).Limit(1).Find(&queryAccountModel)
+	db.Where(Account.ColumnAccountModelAccount+" = ? and "+Account.ColumnAccountModelPassword+" = ?", account, password).Limit(1).Find(&queryAccountModel)
 
 	// if the password or account does not correct
 	if queryAccountModel.ID == 0 {
 		LogService.Warming("Login failed. account =", account, ",password =", password)
-		return ActionResponse.CreateActionFailResponse("Account or password error.")
+		return AccountResponse.LoginDatabaseResponse{
+			Code: 400,
+			Message: "Account or password not correct.",
+		}
 	}
 
 	// check whether the token count is out of range (maximum 5 tokens each account)
-	var queryTokenModelList []StickerBoardAccount.AccountTokenModel
-	queryTokenModelListResult := db.Where(StickerBoardAccount.ColumnAccountTokenModelAccountID+" = ?", queryAccountModel.ID).Order(StickerBoardAccount.ColumnAccountTokenModelUpdateTime+" desc").Find(&queryTokenModelList)
+	var queryTokenModelList []Account.AccountTokenModel
+	queryTokenModelListResult := db.Where(Account.ColumnAccountTokenModelAccountID+" = ?", queryAccountModel.ID).Order(Account.ColumnAccountTokenModelUpdateTime+" desc").Find(&queryTokenModelList)
 	if queryTokenModelListResult.RowsAffected >= _MAX_TOKEN_PER_ACCOUNT {
 		// remove the oldest token
 		db.Delete(queryTokenModelList[_MAX_TOKEN_PER_ACCOUNT - 1])
@@ -176,9 +185,12 @@ func LoginAccount(
 	tokenUUID, errUUID := uuid.NewRandom()
 	if errUUID != nil {
 		LogService.Warming("Login failed, can not generate token. account =", account, ",password =", password)
-		return ActionResponse.CreateActionFailResponse("Can not generate token.")
+		return AccountResponse.LoginDatabaseResponse{
+			Code: 500,
+			Message: "Server internal error.",
+		}
 	}
-	var insertAccountTokenModel = StickerBoardAccount.AccountTokenModel{
+	var insertAccountTokenModel = Account.AccountTokenModel{
 		Token:                 fmt.Sprintf("%s", tokenUUID),
 		AccountID:             queryAccountModel.ID,
 		Platform:              platform,
@@ -189,20 +201,25 @@ func LoginAccount(
 	}
 	db.Create(&insertAccountTokenModel)
 
-	return ActionResponse.CreateActionSuccessResponse()
+	return AccountResponse.LoginDatabaseResponse{
+		Code: 200,
+		Message: "Login success",
+		Token: insertAccountTokenModel.Token,
+		EffectiveTime: insertAccountTokenModel.ExpireTimeMilliSecond,
+	}
 }
 
-func AuthToken(token string, platform int, brand string, deviceName string, machineCode string) ActionResponse.ActionResponse {
+func AuthToken(token string, platform int, brand string, deviceName string, machineCode string) AccountResponse.AuthDatabaseResponse {
 	db := getDB()
 
-	var queryList []StickerBoardAccount.AccountTokenModel
-	queryListResult := db.Where(StickerBoardAccount.ColumnAccountTokenModelToken+" = ? and "+
-				StickerBoardAccount.ColumnAccountTokenModelPlatform + " = ? and " +
-				StickerBoardAccount.ColumnAccountTokenModelBrand + " = ? and " +
-				StickerBoardAccount.ColumnAccountTokenModelDeviceName + " = ? and " +
-				StickerBoardAccount.ColumnAccountTokenModelMachineCode + " = ?",
+	var queryList []Account.AccountTokenModel
+	queryListResult := db.Where(Account.ColumnAccountTokenModelToken+" = ? and "+
+				Account.ColumnAccountTokenModelPlatform + " = ? and " +
+				Account.ColumnAccountTokenModelBrand + " = ? and " +
+				Account.ColumnAccountTokenModelDeviceName + " = ? and " +
+				Account.ColumnAccountTokenModelMachineCode + " = ?",
 		token, platform, brand, deviceName, machineCode,
-	).Order(StickerBoardAccount.ColumnAccountTokenModelUpdateTime+" desc").Limit(1).Find(&queryList)
+	).Order(Account.ColumnAccountTokenModelUpdateTime+" desc").Limit(1).Find(&queryList)
 
 	// check whether the token exists
 	if queryListResult.RowsAffected >= 1 {
@@ -213,16 +230,25 @@ func AuthToken(token string, platform int, brand string, deviceName string, mach
 			// token is expired
 			db.Delete(tokenModel)
 			LogService.Success("Auth account failed, token expired. currentTimestamp =", currentTimestamp, " updateTimestamp =", tokenModel.UpdateTime, " expiredTimeMilliSecond =", tokenModel.ExpireTimeMilliSecond)
-			return ActionResponse.CreateActionFailResponse("Token was expired, please login.")
+			return AccountResponse.AuthDatabaseResponse{
+				Code: 400,
+				Message: "Token was expired, please login.",
+			}
 		} else {
 			// token is not expired
 			tokenModel.UpdateTime = currentTimestamp
 			db.Save(tokenModel)
 			LogService.Success("Auth account success. token =", token)
-			return ActionResponse.CreateActionSuccessResponse()
+			return AccountResponse.AuthDatabaseResponse{
+				Code: 200,
+				Message: "Auth succeed",
+			}
 		}
 	}
 	LogService.Success("Auth account success. token not exist. token =", token)
-	return ActionResponse.CreateActionFailResponse("Token was expired, please login.")
+	return AccountResponse.AuthDatabaseResponse{
+		Code: 400,
+		Message: "Token was expired, please login.",
+	}
 }
 
