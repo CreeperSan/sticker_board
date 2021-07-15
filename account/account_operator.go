@@ -17,12 +17,10 @@ func GetVersionName() string {
 
 func Init(){
 	LogService.Info(StickerBoardAccount.TAG, "Initializing ...")
-	// Initializing Database
 	StickerBoardAccountDatabase.Initialize()
-	//StickerBoardAccountDatabase.RegisterAccount("acd", "1231", "s6d5a", "email.com")
-	//StickerBoardAccountDatabase.RegisterAccount("account", "123213121", "UserName", "7s29@email.com")
-	//StickerBoardAccountDatabase.RegisterAccount("account2", "12346578", "UserName2", "2@email.com")
-	//StickerBoardAccountDatabase.LoginAccount("account2", "12346578", StickerBoardAccount.PlatformUndefined, "test", "test", "test")
-	//StickerBoardAccountDatabase.AuthToken("5672aed2-e0c0-43a9-92b5-6bdcb9af5acc", StickerBoardAccount.PlatformUndefined, "test", "test", "test")
 	LogService.Info(StickerBoardAccount.TAG, "Initialized successful.")
+}
+
+func IsAccountExist(accountID uint) bool {
+	return StickerBoardAccountDatabase.IsAccountExist(accountID)
 }

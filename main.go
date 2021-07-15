@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	StickerBoardAccount "sticker_board/account"
+	StickerAccount "sticker_board/account"
 	ApiGeneral "sticker_board/api"
+	Sticker "sticker_board/sticker"
 )
 
 
 func main() {
 	fmt.Println("========= Sticker Board =========")
-	StickerBoardAccount.Init()
+	StickerAccount.Init()
+	Sticker.Init()
 	ApiGeneral.Initialize()
 }

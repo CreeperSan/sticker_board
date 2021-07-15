@@ -3,15 +3,12 @@ package Account
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	Account "sticker_board/account/database/model"
 	AccountResponse "sticker_board/account/database/response"
 	ActionResponse "sticker_board/account/response"
-	StickerBoard "sticker_board/application/const"
+	Application "sticker_board/application/database"
 	Formatter "sticker_board/lib/formatter"
 	LogService "sticker_board/lib/log_service"
-	SharedPreferences "sticker_board/lib/shared_preferences"
 	"strings"
 	"time"
 )
@@ -20,39 +17,9 @@ import (
 
 const _MAX_TOKEN_PER_ACCOUNT = 5
 
-var databaseName string = ""
-var databaseUsername string = ""
-var databasePassword string = ""
-var databasePort int = 0
-var databaseAddress string = ""
-func getDB() *gorm.DB {
-	if databaseName == "" {
-		databaseName = SharedPreferences.GetString(StickerBoard.SPMySQLDatabaseName, databaseName)
-	}
-	if databaseUsername == "" {
-		databaseUsername = SharedPreferences.GetString(StickerBoard.SPMySQLDatabaseUserName, databaseUsername)
-	}
-	if databasePassword == "" {
-		databasePassword = SharedPreferences.GetString(StickerBoard.SPMySQLDatabasePassword, databasePassword)
-	}
-	if databaseAddress == "" {
-		databaseAddress = SharedPreferences.GetString(StickerBoard.SPMySQLDatabaseAddress, databaseAddress)
-	}
-	if databasePort == 0 {
-		databasePort = SharedPreferences.GetInt(StickerBoard.SPMySQLDatabasePort, databasePort)
-	}
-
-	dsn := databaseUsername+":"+databasePassword+"@/"+databaseName+"?charset=utf8"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	return db
-}
-
 func Initialize()  {
 	// Connect to MySQL database
-	db := getDB()
+	db := Application.GetDB()
 
 	// Auto migrate -> Account Table
 	err := db.AutoMigrate(&Account.AccountModel{})
@@ -113,14 +80,14 @@ func RegisterAccount(
 
 	var queryCount int64 = 0
 	// check account weather already been register
-	err := getDB().Model(&Account.AccountModel{}).Where(Account.ColumnAccountModelAccount+" = ?", account).Count(&queryCount)
+	err := Application.GetDB().Model(&Account.AccountModel{}).Where(Account.ColumnAccountModelAccount+" = ?", account).Count(&queryCount)
 	if queryCount > 0 {
 		LogService.Warming("Fail to register account, account already exist. account=",account," password=",password," userName=",userName," email=",email,".")
 		return ActionResponse.CreateActionFailResponse("Account already register, please login directly")
 	}
 
 	// check account weather already been register
-	err = getDB().Model(&Account.AccountModel{}).Where(Account.ColumnAccountModelEmail+" = ?", email).Count(&queryCount)
+	err = Application.GetDB().Model(&Account.AccountModel{}).Where(Account.ColumnAccountModelEmail+" = ?", email).Count(&queryCount)
 	if queryCount > 0 {
 		LogService.Warming("Fail to register account, email address already in used. account=",account," password=",password," userName=",userName," email=",email,".")
 		return ActionResponse.CreateActionFailResponse("Email already registered")
@@ -133,7 +100,7 @@ func RegisterAccount(
 	accountModel.UserName = userName
 	accountModel.Email = email
 
-	result := getDB().Create(&accountModel)
+	result := Application.GetDB().Create(&accountModel)
 	if result.Error != nil {
 		LogService.Failure("Fail to register account, insert into database error. account =",account," password =",password," userName =",userName," email =",email,".")
 		LogService.Error(err)
@@ -161,7 +128,7 @@ func LoginAccount(
 	// check whether the account and database correct
 	var queryAccountModel = Account.AccountModel{}
 	queryAccountModel.ID = 0
-	db := getDB()
+	db := Application.GetDB()
 	db.Where(Account.ColumnAccountModelAccount+" = ? and "+Account.ColumnAccountModelPassword+" = ?", account, password).Limit(1).Find(&queryAccountModel)
 
 	// if the password or account does not correct
@@ -210,7 +177,7 @@ func LoginAccount(
 }
 
 func AuthToken(token string, platform int, brand string, deviceName string, machineCode string) AccountResponse.AuthDatabaseResponse {
-	db := getDB()
+	db := Application.GetDB()
 
 	var queryList []Account.AccountTokenModel
 	queryListResult := db.Where(Account.ColumnAccountTokenModelToken+" = ? and "+
@@ -252,3 +219,12 @@ func AuthToken(token string, platform int, brand string, deviceName string, mach
 	}
 }
 
+func IsAccountExist(accountID uint) bool {
+	db := Application.GetDB()
+
+	var queryCount int64 = 0
+
+	db.Model(&Account.AccountModel{}).Where(Account.ColumnAccountModelID+" = ?", accountID).Count(&queryCount)
+
+	return queryCount > 0
+}
