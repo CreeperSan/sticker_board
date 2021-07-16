@@ -2,6 +2,9 @@ package StickerDatabase
 
 const TableNameStickerTagModel = "sticker_tag"
 
+const ColumnStickerTagModelAccountID = "account_id"
+const ColumnStickerTagModelTagID = "tag_id"
+
 type StickerTagModel struct {
 	AccountID uint `gorm:"column:account_id; not null;"`
 	TagID uint `gorm:"column:tag_id; not null;"`

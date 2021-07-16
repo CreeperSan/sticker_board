@@ -3,16 +3,17 @@ package StickerDatabase
 const TableNameStickerBasicModel = "sticker_basic"
 
 const ColumnStickerBasicModelID = "_id"
-const ColumnStickerBasicModelType = "_id"
-const ColumnStickerBasicModelAccountID = "_id"
-const ColumnStickerBasicModelStar = "_id"
-const ColumnStickerBasicModelPinned = "_id"
-const ColumnStickerBasicModelTitle = "_id"
-const ColumnStickerBasicModelBackground = "_id"
-const ColumnStickerBasicModelCreateTime = "_id"
-const ColumnStickerBasicModelUpdateTime = "_id"
-const ColumnStickerBasicModelSearchText = "_id"
-const ColumnStickerBasicModelExtra = "_id"
+const ColumnStickerBasicModelType = "type"
+const ColumnStickerBasicModelAccountID = "account_id"
+const ColumnStickerBasicModelStar = "star"
+const ColumnStickerBasicModelPinned = "is_pinned"
+const ColumnStickerBasicModelStatus = "status"
+const ColumnStickerBasicModelTitle = "title"
+const ColumnStickerBasicModelBackground = "background"
+const ColumnStickerBasicModelCreateTime = "create_time"
+const ColumnStickerBasicModelUpdateTime = "update_time"
+const ColumnStickerBasicModelSearchText = "search_text"
+const ColumnStickerBasicModelExtra = "extra"
 
 type StickerBasicModel struct {
 	ID         uint   `gorm:"column:_id; unique; primary_key; autoincrement;"`
