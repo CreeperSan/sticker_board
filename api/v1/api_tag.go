@@ -14,18 +14,38 @@ func InitializeTag(app *iris.Application){
 }
 
 func createTag(ctx iris.Context){
-
+	type RequestParams struct {
+		TagName string `json:"tag_name"`
+		Icon    string `json:"icon"`
+		Color   int `json:"color"`
+	}
 	type ResponseParams struct {
 		Code    int    `json:"code"`
 		Message string `json:"msg"`
 	}
 
-	//authResult := ApiMiddleware.ParseFromAuthMiddleware(ctx)
+	authResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
 
-	authResult := ctx.Values().Get("_AccountInfo").(ApiMiddleware.AuthAccountMiddlewareResult)
+	// parse params
+	requestParams := RequestParams{}
+	err := ctx.ReadJSON(&requestParams)
+	if err != nil {
+		ctx.JSON(ResponseParams{
+			Code: 406,
+			Message: "Params Error",
+		})
+		return
+	}
+
+	// can't make tag color to transparent
+	if requestParams.Color <= 0 {
+		requestParams.Color = 0xFF000000
+	}
+
+	requestParams.Icon = "icon:tag_default"
 
 	ctx.JSON(ResponseParams{
 		Code: 200,
-		Message: "Todo" + string(authResult.AccountID),
+		Message: "Todo createTag -> " + requestParams.TagName + "  " + string(authResult.AccountID),
 	})
 }

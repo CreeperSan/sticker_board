@@ -119,6 +119,7 @@ func authToken(ctx iris.Context)  {
 		Brand       string `json:"brand"`
 		DeviceName  string `json:"device_name"`
 		MachineCode string `json:"machine_code"`
+		AccountID   uint   `json:"uid"`
 	}
 	type ResponseParams struct {
 		Code    int    `json:"code"`
@@ -137,9 +138,8 @@ func authToken(ctx iris.Context)  {
 	}
 
 	// Auth Code
-	authResponse := StickerBoardAccount.AuthToken(requestParams.Token, requestParams.Platform, requestParams.Brand,
-		requestParams.DeviceName, requestParams.MachineCode)
-
+	authResponse := StickerBoardAccount.AuthToken(requestParams.AccountID, requestParams.Token, requestParams.Platform,
+		requestParams.Brand, requestParams.DeviceName, requestParams.MachineCode)
 
 	// return data to client
 	ctx.JSON(ResponseParams{

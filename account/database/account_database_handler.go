@@ -176,7 +176,7 @@ func LoginAccount(
 	}
 }
 
-func AuthToken(token string, platform int, brand string, deviceName string, machineCode string) AccountResponse.AuthDatabaseResponse {
+func AuthToken(accountID uint, token string, platform int, brand string, deviceName string, machineCode string) AccountResponse.AuthDatabaseResponse {
 	db := Application.GetDB()
 
 	var queryList []Account.AccountTokenModel
@@ -203,12 +203,23 @@ func AuthToken(token string, platform int, brand string, deviceName string, mach
 			}
 		} else {
 			// token is not expired
+			// then check the account is the same as database's account id
+			if accountID != tokenModel.AccountID {
+				return AccountResponse.AuthDatabaseResponse{
+					Code: 400,
+					Message: "Token was expired, please login.",
+				}
+			}
+			// auth pass
 			tokenModel.UpdateTime = currentTimestamp
 			db.Save(tokenModel)
 			LogService.Success("Auth account success. token =", token)
 			return AccountResponse.AuthDatabaseResponse{
 				Code: 200,
 				Message: "Auth succeed",
+				UpdateTime: tokenModel.UpdateTime,
+				ExpireTimeMilliSecond: tokenModel.ExpireTimeMilliSecond,
+				AccountID: tokenModel.AccountID,
 			}
 		}
 	}
