@@ -7,7 +7,7 @@ import (
 	StickerResponse "sticker_board/sticker/response"
 )
 
-func CreateTag(accountID uint, name string) StickerResponse.SimpleResponse {
+func CreateTag(accountID uint, name string, icon string, color int, extra string) StickerResponse.SimpleResponse {
 	db := Application.GetDB()
 
 	// check if account exists
@@ -21,9 +21,9 @@ func CreateTag(accountID uint, name string) StickerResponse.SimpleResponse {
 	var tagModel = StickerDatabase.TagModel{
 		AccountID: accountID,
 		Name: name,
-		Extra: "",
-		Color: -1,
-		Icon: "",
+		Extra: extra,
+		Color: color,
+		Icon: icon,
 	}
 
 	db.Create(&tagModel)
@@ -32,13 +32,48 @@ func CreateTag(accountID uint, name string) StickerResponse.SimpleResponse {
 }
 
 func DeleteTag(accountID uint, tagID uint) StickerResponse.SimpleResponse {
-	//db := Application.GetDB()
+	db := Application.GetDB()
 
-	//db.Where(+" = ? and "++" = ?", accountID, tagID)
+	// check if account exists
+	if !Account.IsAccountExist(accountID) {
+		return StickerResponse.SimpleResponse{
+			Code: 400,
+			Message: "Account not exist.",
+		}
+	}
+
+	db.
+		Where(StickerDatabase.ColumnTagModelAccountID+" = ? and "+StickerDatabase.ColumnTagModelID+" = ?", accountID, tagID).
+		Delete(&StickerDatabase.TagModel{})
 
 	return StickerResponse.SimpleResponse{
-		Code: 400,
-		Message: "Todo",
+		Code: 200,
+		Message: "Success",
+	}
+}
+
+func QueryAllTag(accountID uint) StickerResponse.QueryTagResponse {
+	db := Application.GetDB()
+
+	// check if account exists
+	if !Account.IsAccountExist(accountID) {
+		return StickerResponse.QueryTagResponse{
+			Code: 400,
+			Message: "Account not exist.",
+		}
+	}
+
+	var queryResult []StickerDatabase.TagModel
+
+	db.
+		Where(StickerDatabase.ColumnTagModelAccountID+" = ?", accountID).
+		Find(&queryResult)
+
+
+	return StickerResponse.QueryTagResponse{
+		Code: 200,
+		Message: "Success",
+		Data: queryResult,
 	}
 }
 

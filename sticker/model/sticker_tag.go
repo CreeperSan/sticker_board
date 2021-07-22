@@ -20,6 +20,7 @@ type TagModel struct {
 	Icon       string `gorm:"column:icon;"`
 	Color      int    `gorm:"column:color;"`
 	Extra      string `gorm:"column:extra;"`
+	Sort       int    `gorm:"column:sort;"`
 }
 
 func (TagModel) TableName() string {

@@ -12,6 +12,7 @@ func Initialize()  {
 	// Initializing web server
 	ApiV1.InitializeAccount(app)
 	ApiV1.InitializeTag(app)
+	ApiV1.InitializeCategory(app)
 
 
 	startServerError := app.Listen(":8080")

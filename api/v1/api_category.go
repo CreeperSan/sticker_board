@@ -7,19 +7,20 @@ import (
 	StickerDatabase "sticker_board/sticker/database"
 )
 
-func InitializeTag(app *iris.Application){
-	tagApi := app.Party("/api/tag/v1")
+func InitializeCategory(app *iris.Application){
+	categoryApi := app.Party("/api/category/v1")
 
-	tagApi.Use(ApiMiddleware.AuthAccountMiddleware)
+	categoryApi.Use(ApiMiddleware.AuthAccountMiddleware)
 
-	tagApi.Post("/create", createTag)
-	tagApi.Post("/delete", deleteTag)
-	tagApi.Post("/list", queryTagList)
+	categoryApi.Post("/create", createCategory)
+	categoryApi.Post("/delete", deleteCategory)
+	categoryApi.Post("/list", queryCategoryList)
 }
 
-func createTag(ctx iris.Context){
+
+func createCategory(ctx iris.Context){
 	type RequestParams struct {
-		TagName string `json:"tag_name"`
+		CategoryName string `json:"category_name"`
 		Icon    string `json:"icon"`
 		Color   int `json:"color"`
 	}
@@ -41,21 +42,21 @@ func createTag(ctx iris.Context){
 		return
 	}
 
-	// can't make tag color to transparent
+	// can't make category color to transparent
 	if requestParams.Color <= 0 {
 		requestParams.Color = 0xFF000000
 	}
-	requestParams.Color = 0xFF000000 // Currently not support custom tag color
-	requestParams.Icon = "icon:tag_default" // Currently not support custom tag color
+	requestParams.Color = 0xFF000000 // Currently not support custom category color
+	requestParams.Icon = "icon:category_default" // Currently not support custom category color
 
-	if !Formatter.CheckStringWithLength(requestParams.TagName, 1, 30) {
+	if !Formatter.CheckStringWithLength(requestParams.CategoryName, 1, 30) {
 		ctx.JSON(ResponseParams{
 			Code: 406,
 			Message: "Params Error",
 		})
 	}
 
-	StickerDatabase.CreateTag(authResult.AccountID, requestParams.TagName, requestParams.Icon, requestParams.Color, "")
+	StickerDatabase.CreateCategory(authResult.AccountID, 0, requestParams.CategoryName, requestParams.Icon, requestParams.Color, "")
 
 	ctx.JSON(ResponseParams{
 		Code: 200,
@@ -63,9 +64,9 @@ func createTag(ctx iris.Context){
 	})
 }
 
-func deleteTag(ctx iris.Context){
+func deleteCategory(ctx iris.Context){
 	type RequestParams struct {
-		TagID uint `json:"tag_id"`
+		CategoryID uint `json:"category_id"`
 	}
 	type ResponseParams struct {
 		Code    int    `json:"code"`
@@ -85,7 +86,7 @@ func deleteTag(ctx iris.Context){
 		return
 	}
 
-	StickerDatabase.DeleteTag(authResult.AccountID, requestParams.TagID)
+		StickerDatabase.DeleteCategory(authResult.AccountID, requestParams.CategoryID)
 
 	ctx.JSON(ResponseParams{
 		Code: 200,
@@ -93,9 +94,10 @@ func deleteTag(ctx iris.Context){
 	})
 }
 
-func queryTagList(ctx iris.Context){
+func queryCategoryList(ctx iris.Context){
 	type ResponseParamsItem struct {
-		TagID      uint   `json:"tag_id"`
+		CategoryID uint   `json:"category_id"`
+		ParentID   uint   `json:"parent_id"`
 		CreateTime int    `json:"create_time"`
 		UpdateTime int    `json:"update_time"`
 		Name       string `json:"name"`
@@ -112,7 +114,7 @@ func queryTagList(ctx iris.Context){
 
 	authResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
 
-	queryResponse := StickerDatabase.QueryAllTag(authResult.AccountID)
+	queryResponse := StickerDatabase.QueryAllCategory(authResult.AccountID)
 
 	if queryResponse.Code != 200 {
 		ctx.JSON(ResponseParams{
@@ -124,7 +126,7 @@ func queryTagList(ctx iris.Context){
 	var dataList []ResponseParamsItem
 	for _, tmpItem := range queryResponse.Data {
 		dataList = append(dataList, ResponseParamsItem{
-			TagID: tmpItem.ID,
+			CategoryID: tmpItem.ID,
 			CreateTime: tmpItem.CreateTime,
 			UpdateTime: tmpItem.UpdateTime,
 			Name: tmpItem.Name,
@@ -132,6 +134,7 @@ func queryTagList(ctx iris.Context){
 			Color: tmpItem.Color,
 			Sort: tmpItem.Sort,
 			Extra: tmpItem.Extra,
+			ParentID: tmpItem.ParentID,
 		})
 	}
 
@@ -141,3 +144,4 @@ func queryTagList(ctx iris.Context){
 		Data: dataList,
 	})
 }
+

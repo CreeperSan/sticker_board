@@ -22,6 +22,7 @@ type CategoryModel struct {
 	Icon       string `gorm:"column:icon;"`
 	Color      int    `gorm:"column:color;"`
 	Extra      string `gorm:"column:extra;"`
+	Sort       int    `gorm:"column:sort;"`
 }
 
 func (CategoryModel) TableName() string {
