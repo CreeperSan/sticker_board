@@ -25,5 +25,6 @@ func Initialize(){
 	migrateDatabaseWithInstance(db, Sticker.StickerTagModel{}, "StickerTagModel")
 	migrateDatabaseWithInstance(db, Sticker.StickerCategoryModel{}, "StickerCategoryModel")
 
+	//CreateStickerPlainText(2, 0, 0, "Title", "Content")
 }
 

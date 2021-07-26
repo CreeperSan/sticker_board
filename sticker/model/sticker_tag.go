@@ -12,7 +12,7 @@ const ColumnTagModelColor = "color"
 const ColumnTagModelExtra = "extra"
 
 type TagModel struct {
-	ID         uint   `gorm:"column:_id; primaryKey; autoIncrement; not null"`
+	ID         uint   `gorm:"column:_id; primaryKey; autoIncrement; not null;"`
 	AccountID  uint   `gorm:"column:account_id; not null;"`
 	CreateTime int    `gorm:"column:create_time; not null; autoCreateTime:milli;"`
 	UpdateTime int    `gorm:"column:update_time; not null; autoUpdateTime:milli;"`

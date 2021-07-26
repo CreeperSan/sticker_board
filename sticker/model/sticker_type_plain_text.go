@@ -7,9 +7,9 @@ const ColumnStickerPlainTextModelText = "text"
 const ColumnStickerPlainTextModelSearchText = "search_text"
 
 type StickerPlainTextModel struct {
-	StickerID uint   `gorm:"column:sticker_id; unique; primary_key;"`
+	ID        int    `gorm:"column:_id; primary_key; autoIncrement; not null;"`
+	StickerID uint   `gorm:"column:sticker_id; unique; not null;"`
 	Text      string `gorm:"column:text; not null;"`
-	SearchText string `gorm:"column:search_text; not null;"`
 }
 
 func (StickerPlainTextModel) TableName() string {
