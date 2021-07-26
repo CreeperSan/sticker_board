@@ -12,11 +12,11 @@ func getStickerBasic(accountID uint, stickerID uint) Sticker.StickerBasicModel {
 
 	var queryModel = Sticker.StickerBasicModel{}
 
-	err := db.
-		Where(Sticker.ColumnStickerBasicModelAccountID +" = ? and " + Sticker.ColumnStickerBasicModelID + " = ?").
+	result := db.
+		Where(Sticker.ColumnStickerBasicModelAccountID +" = ? and " + Sticker.ColumnStickerBasicModelID + " = ?", accountID, stickerID).
 		First(&queryModel)
 
-	if err != nil {
+	if result.Error != nil {
 		return queryModel
 	}
 	return queryModel
@@ -38,22 +38,20 @@ func DeleteSticker(accountID uint, stickerID uint) StickerResponse.SimpleRespons
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 
-		tx.Delete(&Sticker.StickerBasicModel{
+		result := tx.Delete(&Sticker.StickerBasicModel{
 			ID: stickerID,
 			AccountID: accountID,
 		})
 
-		tx.Delete(&Sticker.StickerPlainTextModel{
-			StickerID: stickerID,
-		})
+		result = tx.Where( Sticker.ColumnStickerPlainTextModelStickerID + " = ?", stickerID).Delete(&Sticker.StickerPlainTextModel{})
 
-		tx.Delete(&Sticker.StickerCategoryModel{
-			StickerID: stickerID,
-		})
+		result = tx.Where( Sticker.ColumnStickerCategoryModelCategoryID + " = ?", stickerID).Delete(Sticker.StickerCategoryModel{})
 
-		tx.Delete(&Sticker.StickerTagModel{
-			StickerID: stickerID,
-		})
+		result = tx.Where( Sticker.ColumnStickerTagModelID + " = ?", stickerID).Delete(&Sticker.StickerTagModel{})
+
+		if result.Error != nil {
+			return result.Error
+		}
 
 		return nil
 	})

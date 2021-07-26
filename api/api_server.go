@@ -13,9 +13,9 @@ func Initialize()  {
 	ApiV1.InitializeAccount(app)
 	ApiV1.InitializeTag(app)
 	ApiV1.InitializeCategory(app)
+	ApiV1.InitializeStickerCommon(app)
 	ApiV1.InitializeStickerPlainText(app)
 	ApiV1.InitializeQuery(app)
-
 
 	startServerError := app.Listen(":8080")
 	if startServerError != nil {

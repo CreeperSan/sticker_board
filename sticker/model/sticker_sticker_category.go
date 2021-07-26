@@ -2,6 +2,7 @@ package StickerDatabase
 
 const TableNameStickerCategoryModel = "sticker_category"
 
+const ColumnStickerCategoryModelID = "_id"
 const ColumnStickerCategoryModelAccountID = "account_id"
 const ColumnStickerCategoryModelCategoryID = "category_id"
 

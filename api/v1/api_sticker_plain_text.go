@@ -11,7 +11,7 @@ func InitializeStickerPlainText(app *iris.Application)  {
 
 	stickerPlainText.Use(ApiMiddleware.AuthAccountMiddleware)
 
-	stickerPlainText.Post("create", createPlainTextSticker)
+	stickerPlainText.Post("/create", createPlainTextSticker)
 }
 
 func createPlainTextSticker(ctx iris.Context){

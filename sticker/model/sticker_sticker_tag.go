@@ -2,6 +2,7 @@ package StickerDatabase
 
 const TableNameStickerTagModel = "sticker_tag"
 
+const ColumnStickerTagModelID = "_id"
 const ColumnStickerTagModelAccountID = "account_id"
 const ColumnStickerTagModelTagID = "tag_id"
 
