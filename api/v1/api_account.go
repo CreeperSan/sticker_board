@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/iris/v12"
 	StickerBoardConst "sticker_board/account/const"
 	StickerBoardAccount "sticker_board/account/database"
+	ApiMiddleware "sticker_board/api/middleware"
 	Formatter "sticker_board/lib/formatter"
 	LogService "sticker_board/lib/log_service"
 	"strings"
@@ -14,7 +15,7 @@ func InitializeAccount(app *iris.Application){
 
 	accountApi.Post("/login", login)
 	accountApi.Post("/register", register)
-	accountApi.Post("/auth_token", authToken)
+	accountApi.Post("/auth_token", ApiMiddleware.AuthAccountMiddleware, authToken)
 }
 
 func login(ctx iris.Context)  {
@@ -113,33 +114,17 @@ func register(ctx iris.Context)  {
 }
 
 func authToken(ctx iris.Context)  {
-	type RequestParams struct {
-		Token       string `json:"token"`
-		Platform    int    `json:"platform"`
-		Brand       string `json:"brand"`
-		DeviceName  string `json:"device_name"`
-		MachineCode string `json:"machine_code"`
-		AccountID   uint   `json:"uid"`
-	}
 	type ResponseParams struct {
 		Code    int    `json:"code"`
 		Message string `json:"msg"`
 	}
 
-	// parse params
-	requestParams := RequestParams{}
-	err := ctx.ReadJSON(&requestParams)
-	if err != nil {
-		ctx.JSON(ResponseParams{
-			Code: 406,
-			Message: "Params Error",
-		})
-		return
-	}
+	// auth header
+	authResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
 
 	// Auth Code
-	authResponse := StickerBoardAccount.AuthToken(requestParams.AccountID, requestParams.Token, requestParams.Platform,
-		requestParams.Brand, requestParams.DeviceName, requestParams.MachineCode)
+	authResponse := StickerBoardAccount.AuthToken(authResult.AccountID, authResult.Token, authResult.Platform,
+		authResult.Brand, authResult.DeviceName, authResult.MachineCode)
 
 	// return data to client
 	ctx.JSON(ResponseParams{
