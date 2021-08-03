@@ -8,6 +8,7 @@ import (
 func InitializeQuery(app *iris.Application)  {
 	stickerPlainText := app.Party("/api/query/v1")
 
+	stickerPlainText.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerPlainText.Use(ApiMiddleware.AuthAccountMiddleware)
 
 	stickerPlainText.Post("sticker", querySticker)

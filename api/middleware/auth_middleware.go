@@ -49,14 +49,14 @@ func AuthAccountMiddleware(ctx iris.Context) {
 
 	// auth pass
 	ctx.Values().Set("_AccountInfo", AuthAccountMiddlewareResult{
-		Token: token,
-		AccountID: authTokenResult.AccountID,
-		Platform: platform,
-		Brand: brand,
-		DeviceName: deviceName,
-		MachineCode: machineCode,
+		Token:                 token,
+		AccountID:             authTokenResult.AccountID,
+		Platform:              platform,
+		Brand:                 brand,
+		DeviceName:            deviceName,
+		MachineCode:           machineCode,
 		ExpireTimeMilliSecond: authTokenResult.ExpireTimeMilliSecond,
-		UpdateTime: authTokenResult.UpdateTime,
+		UpdateTime:            authTokenResult.UpdateTime,
 	})
 
 	ctx.Next()
@@ -67,3 +67,49 @@ func AuthAccountMiddleWareGetResponse(ctx iris.Context) AuthAccountMiddlewareRes
 }
 
 
+
+
+
+
+
+
+type AuthVersionMiddlewareResult struct {
+	Platform    int
+	VersionCode int
+}
+
+func AuthVersionMiddleware(ctx iris.Context) {
+	type ResponseParams struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+
+	platform, convertPlatformErr := strconv.Atoi(ctx.GetHeader("platform"))
+	if convertPlatformErr != nil {
+		platform = 0
+	}
+	versionCode, convertVersionCodeErr := strconv.Atoi(ctx.GetHeader("version_code"))
+	if convertVersionCodeErr != nil {
+		platform = 0
+	}
+
+	if versionCode <= 0 || platform <= 0 {
+		ctx.JSON(ResponseParams{
+			Code: 401,
+			Message: "Current application version is out of date, please update to newest version.",
+		})
+		return
+	}
+
+	// auth pass
+	ctx.Values().Set("_VersionInfo", AuthVersionMiddlewareResult{
+		Platform:    platform,
+		VersionCode: versionCode,
+	})
+
+	ctx.Next()
+}
+
+func AuthVersionMiddleWareGetResponse(ctx iris.Context) AuthVersionMiddlewareResult {
+	return ctx.Values().Get("_VersionInfo").(AuthVersionMiddlewareResult)
+}

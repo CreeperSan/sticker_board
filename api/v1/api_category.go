@@ -10,6 +10,7 @@ import (
 func InitializeCategory(app *iris.Application){
 	categoryApi := app.Party("/api/category/v1")
 
+	categoryApi.Use(ApiMiddleware.AuthVersionMiddleware)
 	categoryApi.Use(ApiMiddleware.AuthAccountMiddleware)
 
 	categoryApi.Post("/create", createCategory)

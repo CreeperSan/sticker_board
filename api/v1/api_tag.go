@@ -10,6 +10,7 @@ import (
 func InitializeTag(app *iris.Application){
 	tagApi := app.Party("/api/tag/v1")
 
+	tagApi.Use(ApiMiddleware.AuthVersionMiddleware)
 	tagApi.Use(ApiMiddleware.AuthAccountMiddleware)
 
 	tagApi.Post("/create", createTag)

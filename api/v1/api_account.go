@@ -13,6 +13,8 @@ import (
 func InitializeAccount(app *iris.Application){
 	accountApi := app.Party("/api/account/v1")
 
+	accountApi.Use(ApiMiddleware.AuthVersionMiddleware)
+
 	accountApi.Post("/login", login)
 	accountApi.Post("/register", register)
 	accountApi.Post("/auth_token", ApiMiddleware.AuthAccountMiddleware, authToken)

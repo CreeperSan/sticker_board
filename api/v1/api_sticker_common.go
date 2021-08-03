@@ -9,6 +9,7 @@ import (
 func InitializeStickerCommon(app *iris.Application)  {
 	stickerPlainText := app.Party("/api/sticker/v1")
 
+	stickerPlainText.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerPlainText.Use(ApiMiddleware.AuthAccountMiddleware)
 
 	stickerPlainText.Post("/delete", deleteSticker)
