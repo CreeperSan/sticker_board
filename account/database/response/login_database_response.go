@@ -5,5 +5,6 @@ type LoginDatabaseResponse struct {
 	Message       string
 	Token         string
 	EffectiveTime int64
+	UID           uint
 }
 

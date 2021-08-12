@@ -32,6 +32,7 @@ func login(ctx iris.Context)  {
 	type ResponseParamsData struct {
 		Token         string `json:"token"`
 		EffectiveTime int64  `json:"effective_time"`
+		UID           uint   `json:"uid"`
 	}
 	type ResponseParams struct {
 		Code    int                `json:"code"`
@@ -76,6 +77,7 @@ func login(ctx iris.Context)  {
 		Data: ResponseParamsData{
 			Token:         loginResponse.Token,
 			EffectiveTime: loginResponse.EffectiveTime,
+			UID:           loginResponse.UID,
 		},
 	})
 }

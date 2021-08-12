@@ -23,15 +23,15 @@ func AuthAccountMiddleware(ctx iris.Context) {
 		Message string `json:"message"`
 	}
 
-	token := ctx.GetHeader("token")
-	brand := ctx.GetHeader("brand")
-	deviceName := ctx.GetHeader("device_name")
-	machineCode := ctx.GetHeader("machine_code")
-	platform, convertPlatformErr := strconv.Atoi(ctx.GetHeader("platform"))
+	token := ctx.GetHeader("sticker-board-token")
+	brand := ctx.GetHeader("sticker-board-brand")
+	deviceName := ctx.GetHeader("sticker-board-device-name")
+	machineCode := ctx.GetHeader("sticker-board-machine-code")
+	platform, convertPlatformErr := strconv.Atoi(ctx.GetHeader("sticker-board-platform"))
 	if convertPlatformErr != nil {
 		platform = 0
 	}
-	uid, convertUIDErr := strconv.Atoi(ctx.GetHeader("uid"))
+	uid, convertUIDErr := strconv.Atoi(ctx.GetHeader("sticker-board-uid"))
 	if convertUIDErr != nil {
 		uid = -1
 	}
@@ -84,11 +84,11 @@ func AuthVersionMiddleware(ctx iris.Context) {
 		Message string `json:"message"`
 	}
 
-	platform, convertPlatformErr := strconv.Atoi(ctx.GetHeader("platform"))
+	platform, convertPlatformErr := strconv.Atoi(ctx.GetHeader("sticker-board-platform"))
 	if convertPlatformErr != nil {
 		platform = 0
 	}
-	versionCode, convertVersionCodeErr := strconv.Atoi(ctx.GetHeader("version_code"))
+	versionCode, convertVersionCodeErr := strconv.Atoi(ctx.GetHeader("sticker-board-version-code"))
 	if convertVersionCodeErr != nil {
 		platform = 0
 	}

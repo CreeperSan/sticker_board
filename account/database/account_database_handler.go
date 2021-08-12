@@ -173,6 +173,7 @@ func LoginAccount(
 		Message: "Login success",
 		Token: insertAccountTokenModel.Token,
 		EffectiveTime: insertAccountTokenModel.ExpireTimeMilliSecond,
+		UID: insertAccountTokenModel.AccountID,
 	}
 }
 
