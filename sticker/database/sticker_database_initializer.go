@@ -1,6 +1,8 @@
 package StickerDatabase
 
 import (
+	"context"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	Application "sticker_board/application/database"
 	LogService "sticker_board/lib/log_service"
@@ -15,6 +17,10 @@ func migrateDatabaseWithInstance(db *gorm.DB, databaseModel interface{}, databas
 	}
 }
 
+func migrateMongoDBWithInstance(mongoClient *mongo.Client, mongoDB *mongo.Database, mongoCtx context.Context, collectionName string){
+	mongoDB.Collection(collectionName)
+}
+
 func Initialize(){
 	db := Application.GetDB()
 
@@ -25,6 +31,9 @@ func Initialize(){
 	migrateDatabaseWithInstance(db, Sticker.StickerTagModel{}, "StickerTagModel")
 	migrateDatabaseWithInstance(db, Sticker.StickerCategoryModel{}, "StickerCategoryModel")
 
-	//CreateStickerPlainText(2, 0, 0, "Title", "Content")
+	mongoDB, mongoClient, mongoCtx := Application.GetMongoDB()
+	migrateMongoDBWithInstance(mongoDB, mongoClient ,mongoCtx, "Category")
+	migrateMongoDBWithInstance(mongoDB, mongoClient ,mongoCtx, "Tag")
+	migrateMongoDBWithInstance(mongoDB, mongoClient ,mongoCtx, "Sticker")
 }
 
