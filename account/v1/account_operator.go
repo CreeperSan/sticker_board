@@ -1,8 +1,8 @@
-package StickerBoardAccount
+package v1
 
 import (
-	StickerBoardAccount "sticker_board/account/const"
-	StickerBoardAccountDatabase "sticker_board/account/database"
+	"sticker_board/account/v1/const"
+	StickerBoardAccountDatabase "sticker_board/account/v1/database"
 	LogService "sticker_board/lib/log_service"
 	SharedPreferences "sticker_board/lib/shared_preferences"
 )

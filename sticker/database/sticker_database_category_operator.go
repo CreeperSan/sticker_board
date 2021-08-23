@@ -1,7 +1,7 @@
 package StickerDatabase
 
 import (
-	Account "sticker_board/account/database"
+	"sticker_board/account/v1/database"
 	Application "sticker_board/application/database"
 	StickerDatabase "sticker_board/sticker/model"
 	StickerResponse "sticker_board/sticker/response"

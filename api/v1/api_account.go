@@ -2,8 +2,8 @@ package ApiV1
 
 import (
 	"github.com/kataras/iris/v12"
-	StickerBoardConst "sticker_board/account/const"
-	StickerBoardAccount "sticker_board/account/database"
+	StickerBoardConst "sticker_board/account/v1/const"
+	StickerBoardAccount "sticker_board/account/v1/database"
 	ApiMiddleware "sticker_board/api/middleware"
 	Formatter "sticker_board/lib/formatter"
 	LogService "sticker_board/lib/log_service"

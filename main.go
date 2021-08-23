@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	StickerAccount "sticker_board/account"
+	StickerAccount "sticker_board/account/v1"
 	ApiGeneral "sticker_board/api"
 	Sticker "sticker_board/sticker"
 )
