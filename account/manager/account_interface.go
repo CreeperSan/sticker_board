@@ -1,6 +1,6 @@
-package AccountPackage
+package AccountModule
 
-import AccountPackage "sticker_board/account/manager/model"
+import AccountModule "sticker_board/account/manager/response"
 
 type AccountInterface interface {
 
@@ -13,7 +13,7 @@ type AccountInterface interface {
 		password string,
 		userName string,
 		email string,
-	) (isSuccess bool, message string, accountModel AccountPackage.AccountDatabaseModel)
+	) AccountModule.AccountResponse
 
 
 	LoginAccount(
@@ -23,7 +23,7 @@ type AccountInterface interface {
 		brand string,
 		deviceName string,
 		machineCode string,
-	) (isSuccess bool, message string, accountModel AccountPackage.AccountTokenDatabaseModel)
+	) AccountModule.AccountTokenResponse
 
 
 	AuthToken(
@@ -33,12 +33,12 @@ type AccountInterface interface {
 		brand string,
 		deviceName string,
 		machineCode string,
-	) (isSuccess bool, message string, accountModel AccountPackage.AccountTokenDatabaseModel)
+	) AccountModule.AccountTokenResponse
 
 
 	IsAccountExist(
 		accountID int,
-	) (isSuccess bool, message string, accountModel AccountPackage.AccountDatabaseModel)
+	) AccountModule.AccountResponse
 
 
 }

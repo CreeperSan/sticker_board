@@ -1,4 +1,4 @@
-package AccountPackage
+package AccountModule
 
 type AccountDatabaseModel struct {
 
