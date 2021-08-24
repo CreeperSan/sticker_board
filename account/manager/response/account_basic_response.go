@@ -25,6 +25,13 @@ func CreateBasicResponseParamsError() AccountBasicResponse {
 	}
 }
 
+func CreateBasicResponseParamsErrorWithMessage(message string) AccountBasicResponse {
+	return AccountBasicResponse{
+		Code: Code.ResponseCodeParamsError,
+		Message: message,
+	}
+}
+
 func CreateBasicResponseSuccess() AccountBasicResponse {
 	return AccountBasicResponse{
 		Code: Code.ResponseCodeSuccess,
