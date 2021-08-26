@@ -1,18 +1,29 @@
-package AccountV2
+package AccountV2DB
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	StickerBoard "sticker_board/application/const"
 	SharedPreferences "sticker_board/lib/shared_preferences"
 	"time"
 )
 
+const CollectionAccount = "account"
+const CollectionAccountToken = "account_token"
+
 var mongodbDatabaseDatabaseName = ""
 var mongodbDatabaseAddress = ""
 var mongodbDatabasePort = ""
-func GetDB() (mongoClient *mongo.Client, mongoDB *mongo.Database, mongoCtx context.Context) {
+var MongoClient *mongo.Client
+var MongoDB *mongo.Database
+func ConnectDB() (mongoClient *mongo.Client, mongoDB *mongo.Database) {
+	if MongoClient != nil && MongoDB != nil {
+		return MongoClient, MongoDB
+	}
+
 	if mongodbDatabaseDatabaseName == "" {
 		mongodbDatabaseDatabaseName = SharedPreferences.GetString(StickerBoard.SPMongoDBDatabaseName, mongodbDatabaseDatabaseName)
 	}
@@ -34,21 +45,24 @@ func GetDB() (mongoClient *mongo.Client, mongoDB *mongo.Database, mongoCtx conte
 	}
 
 	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
+		//if err = client.Disconnect(ctx); err != nil {
+		//	panic(err)
+		//}
 	}()
 
 	database := client.Database(mongodbDatabaseDatabaseName)
 
 	// Ping the primary
-	//if err := client.Ping(ctx, readpref.Primary()); err != nil {
-	//	panic(err)
-	//}
-	//
-	//fmt.Println("Successfully connected and pinged.")
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+		panic(err)
+	}
 
-	return client, database, ctx
+	fmt.Println("Successfully connected and pinged.")
+
+	MongoClient = client
+	MongoDB = database
+
+	return MongoClient, MongoDB
 }
 
 

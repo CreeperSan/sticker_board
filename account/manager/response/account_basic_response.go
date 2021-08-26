@@ -39,6 +39,20 @@ func CreateBasicResponseSuccess() AccountBasicResponse {
 	}
 }
 
+func CreateBasicResponseInternalError() AccountBasicResponse {
+	return AccountBasicResponse{
+		Code: Code.ResponseCodeDatabaseDisconnected,
+		Message: "Internal error",
+	}
+}
+
+func CreateBasicResponseInternalErrorWithMessage(message string) AccountBasicResponse {
+	return AccountBasicResponse{
+		Code: Code.ResponseCodeInternalError,
+		Message: message,
+	}
+}
+
 func CreateBasicResponseDatabaseDisconnected() AccountBasicResponse {
 	return AccountBasicResponse{
 		Code: Code.ResponseCodeDatabaseDisconnected,

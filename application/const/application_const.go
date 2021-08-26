@@ -13,3 +13,8 @@ const SPMongoDBDatabaseAddress = prefix + "mongodb_database_address"
 const SPMongoDBDatabasePort = prefix + "mongodb_database_port"
 const SPMongoDBDatabaseUsername = prefix + "mongodb_database_username"
 const SPMongoDBDatabasePassword = prefix + "mongodb_database_password"
+
+const ExitCodeNormal = 0
+const ExitCodeDatabaseCreateClientConnectionFailed = 1
+const ExitCodeDatabasePingFailed = 2
+const ExitCodeDatabaseCreateCollectionFailed = 3
