@@ -3,11 +3,11 @@ package StickerDatabase
 import (
 	"sticker_board/account/v1/database"
 	Application "sticker_board/application/database"
-	StickerDatabase "sticker_board/sticker/model"
-	StickerResponse "sticker_board/sticker/response"
+	"sticker_board/sticker/v1/model"
+	"sticker_board/sticker/v1/response"
 )
 
-func CreateCategory(accountID uint, parentID uint, name string, icon string, color int, extra string) StickerResponse.SimpleResponse {
+func CreateTag(accountID uint, name string, icon string, color int, extra string) StickerResponse.SimpleResponse {
 	db := Application.GetDB()
 
 	// check if account exists
@@ -18,21 +18,20 @@ func CreateCategory(accountID uint, parentID uint, name string, icon string, col
 		}
 	}
 
-	var categoryModel = StickerDatabase.CategoryModel{
+	var tagModel = StickerDatabase.TagModel{
 		AccountID: accountID,
 		Name: name,
 		Extra: extra,
 		Color: color,
 		Icon: icon,
-		ParentID: parentID,
 	}
 
-	db.Create(&categoryModel)
+	db.Create(&tagModel)
 
 	return StickerResponse.CreateSuccessSimpleResponse()
 }
 
-func DeleteCategory(accountID uint, categoryID uint) StickerResponse.SimpleResponse {
+func DeleteTag(accountID uint, tagID uint) StickerResponse.SimpleResponse {
 	db := Application.GetDB()
 
 	// check if account exists
@@ -44,8 +43,8 @@ func DeleteCategory(accountID uint, categoryID uint) StickerResponse.SimpleRespo
 	}
 
 	db.
-		Where(StickerDatabase.ColumnCategoryModelAccountID+" = ? and "+StickerDatabase.ColumnCategoryModelID+" = ?", accountID, categoryID).
-		Delete(&StickerDatabase.CategoryModel{})
+		Where(StickerDatabase.ColumnTagModelAccountID+" = ? and "+StickerDatabase.ColumnTagModelID+" = ?", accountID, tagID).
+		Delete(&StickerDatabase.TagModel{})
 
 	return StickerResponse.SimpleResponse{
 		Code: 200,
@@ -53,25 +52,25 @@ func DeleteCategory(accountID uint, categoryID uint) StickerResponse.SimpleRespo
 	}
 }
 
-func QueryAllCategory(accountID uint) StickerResponse.QueryCategoryResponse {
+func QueryAllTag(accountID uint) StickerResponse.QueryTagResponse {
 	db := Application.GetDB()
 
 	// check if account exists
 	if !Account.IsAccountExist(accountID) {
-		return StickerResponse.QueryCategoryResponse{
+		return StickerResponse.QueryTagResponse{
 			Code: 400,
 			Message: "Account not exist.",
 		}
 	}
 
-	var queryResult []StickerDatabase.CategoryModel
+	var queryResult []StickerDatabase.TagModel
 
 	db.
-		Where(StickerDatabase.ColumnCategoryModelAccountID+" = ?", accountID).
+		Where(StickerDatabase.ColumnTagModelAccountID+" = ?", accountID).
 		Find(&queryResult)
 
 
-	return StickerResponse.QueryCategoryResponse{
+	return StickerResponse.QueryTagResponse{
 		Code: 200,
 		Message: "Success",
 		Data: queryResult,

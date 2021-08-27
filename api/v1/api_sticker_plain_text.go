@@ -3,7 +3,6 @@ package ApiV1
 import (
 	"github.com/kataras/iris/v12"
 	ApiMiddleware "sticker_board/api/middleware"
-	StickerDatabase "sticker_board/sticker/database"
 )
 
 func InitializeStickerPlainText(app *iris.Application)  {
@@ -32,40 +31,40 @@ func createPlainTextSticker(ctx iris.Context){
 		Message string `json:"msg"`
 	}
 
-	authResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
-
-	// parse params
-	requestParams := RequestParams{}
-	err := ctx.ReadJSON(&requestParams)
-	if err != nil {
-		ctx.JSON(ResponseParams{
-			Code: 406,
-			Message: "Params Error",
-		})
-		return
-	}
-
-	databaseResponse := StickerDatabase.CreateStickerPlainText(
-		authResult.AccountID,
-		requestParams.Star,
-		requestParams.Pinned,
-		requestParams.Title,
-		requestParams.Text,
-		requestParams.CategoryID,
-		requestParams.TagID,
-	)
-
-	if databaseResponse.Code == 200 {
-		ctx.JSON(ResponseParams{
-			Code: 200,
-			Message: "Success",
-		})
-	} else {
-		ctx.JSON(ResponseParams{
-			Code: 200,
-			Message: databaseResponse.Message,
-		})
-	}
+	//authResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
+	//
+	//// parse params
+	//requestParams := RequestParams{}
+	//err := ctx.ReadJSON(&requestParams)
+	//if err != nil {
+	//	ctx.JSON(ResponseParams{
+	//		Code: 406,
+	//		Message: "Params Error",
+	//	})
+	//	return
+	//}
+	//
+	//databaseResponse := StickerDatabase.CreateStickerPlainText(
+	//	authResult.AccountID,
+	//	requestParams.Star,
+	//	requestParams.Pinned,
+	//	requestParams.Title,
+	//	requestParams.Text,
+	//	requestParams.CategoryID,
+	//	requestParams.TagID,
+	//)
+	//
+	//if databaseResponse.Code == 200 {
+	//	ctx.JSON(ResponseParams{
+	//		Code: 200,
+	//		Message: "Success",
+	//	})
+	//} else {
+	//	ctx.JSON(ResponseParams{
+	//		Code: 200,
+	//		Message: databaseResponse.Message,
+	//	})
+	//}
 
 }
 

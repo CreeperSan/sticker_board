@@ -1,8 +1,8 @@
-package Sticker
+package v1
 
 import (
 	LogService "sticker_board/lib/log_service"
-	StickerDatabase "sticker_board/sticker/database"
+	"sticker_board/sticker/v1/database"
 )
 
 func Init()  {

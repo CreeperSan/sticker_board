@@ -15,6 +15,6 @@ func GetOperator() AccountInterface {
 		return _instance
 	}
 
-	panic("Account Package has not been install yet!")
+	panic("Account Module has not been install yet!")
 }
 

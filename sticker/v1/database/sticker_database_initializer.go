@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 	Application "sticker_board/application/database"
 	LogService "sticker_board/lib/log_service"
-	Sticker "sticker_board/sticker/model"
+	"sticker_board/sticker/v1/model"
 )
 
 func migrateDatabaseWithInstance(db *gorm.DB, databaseModel interface{}, databaseName string){
@@ -24,12 +24,12 @@ func migrateMongoDBWithInstance(mongoClient *mongo.Client, mongoDB *mongo.Databa
 func Initialize(){
 	db := Application.GetDB()
 
-	migrateDatabaseWithInstance(db, Sticker.CategoryModel{}, "CategoryModel")
-	migrateDatabaseWithInstance(db, Sticker.TagModel{}, "TagModel")
-	migrateDatabaseWithInstance(db, Sticker.StickerBasicModel{}, "StickerBasicModel")
-	migrateDatabaseWithInstance(db, Sticker.StickerPlainTextModel{}, "StickerPlainTextModel")
-	migrateDatabaseWithInstance(db, Sticker.StickerTagModel{}, "StickerTagModel")
-	migrateDatabaseWithInstance(db, Sticker.StickerCategoryModel{}, "StickerCategoryModel")
+	migrateDatabaseWithInstance(db, StickerDatabase.CategoryModel{}, "CategoryModel")
+	migrateDatabaseWithInstance(db, StickerDatabase.TagModel{}, "TagModel")
+	migrateDatabaseWithInstance(db, StickerDatabase.StickerBasicModel{}, "StickerBasicModel")
+	migrateDatabaseWithInstance(db, StickerDatabase.StickerPlainTextModel{}, "StickerPlainTextModel")
+	migrateDatabaseWithInstance(db, StickerDatabase.StickerTagModel{}, "StickerTagModel")
+	migrateDatabaseWithInstance(db, StickerDatabase.StickerCategoryModel{}, "StickerCategoryModel")
 
 	mongoDB, mongoClient, mongoCtx := Application.GetMongoDB()
 	migrateMongoDBWithInstance(mongoDB, mongoClient ,mongoCtx, "Category")

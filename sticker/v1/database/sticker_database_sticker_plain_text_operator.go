@@ -3,25 +3,25 @@ package StickerDatabase
 import (
 	"gorm.io/gorm"
 	Application "sticker_board/application/database"
-	StickerConst "sticker_board/sticker/const"
-	Sticker "sticker_board/sticker/model"
-	StickerResponse "sticker_board/sticker/response"
+	"sticker_board/sticker/v1/const"
+	"sticker_board/sticker/v1/model"
+	"sticker_board/sticker/v1/response"
 )
 
 func CreateStickerPlainText(accountID uint, star int, pinned int, title string, content string, categoryID uint, tagIDArray []uint) StickerResponse.SimpleResponse {
 	db := Application.GetDB()
 
 	errTransaction := db.Transaction(func(tx *gorm.DB) error {
-		stickerBasicModel := Sticker.StickerBasicModel{
-			Type: StickerConst.TypePlainText,
-			AccountID: accountID,
-			Star: star,
-			Pinned: pinned,
-			Status: StickerConst.StatusNew,
-			Title: title,
+		stickerBasicModel := StickerDatabase.StickerBasicModel{
+			Type:       StickerConst.TypePlainText,
+			AccountID:  accountID,
+			Star:       star,
+			Pinned:     pinned,
+			Status:     StickerConst.StatusNew,
+			Title:      title,
 			Background: "color:default",
 			SearchText: content,
-			Extra: "",
+			Extra:      "",
 		}
 
 		dbResult := tx.Create(&stickerBasicModel)
@@ -29,7 +29,7 @@ func CreateStickerPlainText(accountID uint, star int, pinned int, title string, 
 			return dbResult.Error
 		}
 
-		dbResult = tx.Create(&Sticker.StickerPlainTextModel{
+		dbResult = tx.Create(&StickerDatabase.StickerPlainTextModel{
 			StickerID: stickerBasicModel.ID,
 			Text: content,
 		})
@@ -40,15 +40,15 @@ func CreateStickerPlainText(accountID uint, star int, pinned int, title string, 
 		// Bind categoryID with sticker
 		if categoryID > 0 {
 			// find out whether the category is exist and belong to user
-			var categoryModel = Sticker.CategoryModel{}
+			var categoryModel = StickerDatabase.CategoryModel{}
 			dbResult = tx.
-				Where(Sticker.ColumnCategoryModelID+ " = ? and " + Sticker.ColumnCategoryModelAccountID + " = ?", categoryID, accountID).
+				Where(StickerDatabase.ColumnCategoryModelID+ " = ? and " +StickerDatabase.ColumnCategoryModelAccountID+ " = ?", categoryID, accountID).
 				First(&categoryModel)
 			if dbResult.Error != nil {
 				return dbResult.Error
 			}
 			// database operation
-			dbResult = tx.Create(&Sticker.StickerCategoryModel{
+			dbResult = tx.Create(&StickerDatabase.StickerCategoryModel{
 				StickerID: stickerBasicModel.ID,
 				CategoryID: categoryID,
 			})
@@ -62,15 +62,15 @@ func CreateStickerPlainText(accountID uint, star int, pinned int, title string, 
 			for i := 0; i < len(tagIDArray); i++ {
 				var tagID = tagIDArray[i]
 				// find out whether the tag is exist and belong to user
-				var tagModel = Sticker.TagModel{}
+				var tagModel = StickerDatabase.TagModel{}
 				dbResult = tx.
-					Where(Sticker.ColumnTagModelID+ " = ? and " + Sticker.ColumnTagModelAccountID + " = ?", tagID, accountID).
+					Where(StickerDatabase.ColumnTagModelID+ " = ? and " +StickerDatabase.ColumnTagModelAccountID+ " = ?", tagID, accountID).
 					First(&tagModel)
 				if dbResult.Error != nil {
 					return dbResult.Error
 				}
 				// database operation
-				dbResult = tx.Create(&Sticker.StickerTagModel{
+				dbResult = tx.Create(&StickerDatabase.StickerTagModel{
 					StickerID: stickerBasicModel.ID,
 					TagID: tagID,
 				})

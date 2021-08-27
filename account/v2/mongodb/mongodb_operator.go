@@ -44,12 +44,6 @@ func ConnectDB() (mongoClient *mongo.Client, mongoDB *mongo.Database) {
 		panic(err)
 	}
 
-	defer func() {
-		//if err = client.Disconnect(ctx); err != nil {
-		//	panic(err)
-		//}
-	}()
-
 	database := client.Database(mongodbDatabaseDatabaseName)
 
 	// Ping the primary

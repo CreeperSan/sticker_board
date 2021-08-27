@@ -3,17 +3,17 @@ package StickerDatabase
 import (
 	"gorm.io/gorm"
 	Application "sticker_board/application/database"
-	Sticker "sticker_board/sticker/model"
-	StickerResponse "sticker_board/sticker/response"
+	"sticker_board/sticker/v1/model"
+	"sticker_board/sticker/v1/response"
 )
 
-func getStickerBasic(accountID uint, stickerID uint) Sticker.StickerBasicModel {
+func getStickerBasic(accountID uint, stickerID uint) StickerDatabase.StickerBasicModel {
 	db := Application.GetDB()
 
-	var queryModel = Sticker.StickerBasicModel{}
+	var queryModel = StickerDatabase.StickerBasicModel{}
 
 	result := db.
-		Where(Sticker.ColumnStickerBasicModelAccountID +" = ? and " + Sticker.ColumnStickerBasicModelID + " = ?", accountID, stickerID).
+		Where(StickerDatabase.ColumnStickerBasicModelAccountID+" = ? and " +StickerDatabase.ColumnStickerBasicModelID+ " = ?", accountID, stickerID).
 		First(&queryModel)
 
 	if result.Error != nil {
@@ -38,16 +38,16 @@ func DeleteSticker(accountID uint, stickerID uint) StickerResponse.SimpleRespons
 
 	err := db.Transaction(func(tx *gorm.DB) error {
 
-		result := tx.Delete(&Sticker.StickerBasicModel{
+		result := tx.Delete(&StickerDatabase.StickerBasicModel{
 			ID: stickerID,
 			AccountID: accountID,
 		})
 
-		result = tx.Where( Sticker.ColumnStickerPlainTextModelStickerID + " = ?", stickerID).Delete(&Sticker.StickerPlainTextModel{})
+		result = tx.Where( StickerDatabase.ColumnStickerPlainTextModelStickerID+ " = ?", stickerID).Delete(&StickerDatabase.StickerPlainTextModel{})
 
-		result = tx.Where( Sticker.ColumnStickerCategoryModelCategoryID + " = ?", stickerID).Delete(Sticker.StickerCategoryModel{})
+		result = tx.Where( StickerDatabase.ColumnStickerCategoryModelCategoryID+ " = ?", stickerID).Delete(StickerDatabase.StickerCategoryModel{})
 
-		result = tx.Where( Sticker.ColumnStickerTagModelID + " = ?", stickerID).Delete(&Sticker.StickerTagModel{})
+		result = tx.Where( StickerDatabase.ColumnStickerTagModelID+ " = ?", stickerID).Delete(&StickerDatabase.StickerTagModel{})
 
 		if result.Error != nil {
 			return result.Error

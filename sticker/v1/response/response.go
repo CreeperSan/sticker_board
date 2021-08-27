@@ -1,6 +1,8 @@
 package StickerResponse
 
-import StickerDatabase "sticker_board/sticker/model"
+import (
+	StickerDatabase2 "sticker_board/sticker/v1/model"
+)
 
 type SimpleResponse struct {
 	Code    int
@@ -18,12 +20,12 @@ func CreateSuccessSimpleResponse() SimpleResponse {
 type QueryTagResponse struct {
 	Code int
 	Message string
-	Data []StickerDatabase.TagModel
+	Data []StickerDatabase2.TagModel
 }
 
 
 type QueryCategoryResponse struct {
 	Code int
 	Message string
-	Data []StickerDatabase.CategoryModel
+	Data []StickerDatabase2.CategoryModel
 }
