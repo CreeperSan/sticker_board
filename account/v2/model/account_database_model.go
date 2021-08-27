@@ -4,8 +4,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// AccountModel Type : Customer type. default is 1
-type AccountModel struct {
+// AccountDatabaseModel Type : Customer type. default is 1
+type AccountDatabaseModel struct {
 	ID           primitive.ObjectID `bson:"_id, omitempty"`
 	Account      string             `bson:"account"`
 	Password     string             `bson:"password"`

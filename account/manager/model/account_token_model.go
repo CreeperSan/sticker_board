@@ -1,6 +1,6 @@
 package AccountModule
 
-type AccountTokenDatabaseModel struct {
+type AccountTokenModel struct {
 	ID          string
 	Token       string
 	AccountID   string

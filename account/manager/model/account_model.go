@@ -1,6 +1,6 @@
 package AccountModule
 
-type AccountDatabaseModel struct {
+type AccountModel struct {
 	ID           string
 	Account      string
 	Password     string

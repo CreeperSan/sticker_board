@@ -4,5 +4,5 @@ import AccountModule "sticker_board/account/manager/model"
 
 type AccountResponse struct {
 	AccountBasicResponse
-	Account AccountModule.AccountDatabaseModel
+	Account AccountModule.AccountModel
 }

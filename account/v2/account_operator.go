@@ -94,7 +94,7 @@ func (operator AccountOperator) RegisterAccount(
 	password = Formatter.FormatPassword(password)
 
 	// 1. Find out whether this account has been registered
-	var queryResult []AccountV2Model.AccountModel
+	var queryResult []AccountV2Model.AccountDatabaseModel
 	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).Find(context.TODO(), bson.M{
 		"account": account,
 	})
@@ -147,7 +147,7 @@ func (operator AccountOperator) RegisterAccount(
 	}
 
 	// 3. Register account and email
-	var writeAccount = AccountV2Model.AccountModel{
+	var writeAccount = AccountV2Model.AccountDatabaseModel{
 		ID:           primitive.NewObjectID(),
 		Account:      account,
 		Password:     password,
@@ -168,7 +168,7 @@ func (operator AccountOperator) RegisterAccount(
 
 	return AccountResponse.AccountResponse{
 		AccountBasicResponse: AccountResponse.CreateBasicResponseSuccess(),
-		Account: AccountModule.AccountDatabaseModel{
+		Account: AccountModule.AccountModel{
 			ID: writeAccount.ID.Hex(),
 			Account: writeAccount.Account,
 			Password: writeAccount.Password,
@@ -197,7 +197,7 @@ func (operator AccountOperator) LoginAccount(
 	password = Formatter.FormatPassword(password)
 
 	// 1. Find out is there an account match the condition
-	var queryAccountResult []AccountV2Model.AccountModel
+	var queryAccountResult []AccountV2Model.AccountDatabaseModel
 	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).Find(context.TODO(), bson.M{
 		"account" : account,
 		"password" : password,
@@ -226,7 +226,7 @@ func (operator AccountOperator) LoginAccount(
 
 	// 2. Checkout the token is already reach the limit of token count
 	var accountModel = queryAccountResult[0] // The account that login
-	var queryTokenResult []AccountV2Model.AccountTokenModel
+	var queryTokenResult []AccountV2Model.AccountTokenDatabaseModel
 	cursor, err = AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).Find(context.TODO(), bson.M{
 		"account_id" : accountModel.ID.Hex(),
 	}, &options.FindOptions{
@@ -273,7 +273,7 @@ func (operator AccountOperator) LoginAccount(
 		}
 	}
 	var currentMillisecond = Formatter.CurrentTimestampMillisecond();
-	var generateTokenModel = AccountV2Model.AccountTokenModel{
+	var generateTokenModel = AccountV2Model.AccountTokenDatabaseModel{
 		ID:          primitive.NewObjectID(),
 		Token:       fmt.Sprintf("%s", tokenUUID),
 		AccountID:   accountModel.ID.Hex(),
@@ -295,7 +295,7 @@ func (operator AccountOperator) LoginAccount(
 	}
 	return AccountResponse.AccountTokenResponse{
 		AccountBasicResponse: AccountResponse.CreateBasicResponseSuccess(),
-		AccountTokenDatabaseModel: AccountModule.AccountTokenDatabaseModel{
+		AccountTokenModel: AccountModule.AccountTokenModel{
 			ID:          generateTokenModel.ID.Hex(),
 			Token:       generateTokenModel.Token,
 			AccountID:   generateTokenModel.AccountID,
@@ -340,7 +340,7 @@ func (operator AccountOperator) AuthToken(
 			),
 		}
 	}
-	var tokenQueryResult []AccountV2Model.AccountTokenModel
+	var tokenQueryResult []AccountV2Model.AccountTokenDatabaseModel
 	err = cursor.All(context.TODO(), &tokenQueryResult)
 	if err != nil {
 		return AccountResponse.AccountTokenResponse{
@@ -411,7 +411,7 @@ func (operator AccountOperator) IsAccountExist(
 			),
 		}
 	}
-	var queryAccountResult []AccountV2Model.AccountModel
+	var queryAccountResult []AccountV2Model.AccountDatabaseModel
 	err = cursor.All(context.TODO(), &queryAccountResult)
 	if err != nil {
 		return AccountResponse.AccountResponse{
@@ -430,7 +430,7 @@ func (operator AccountOperator) IsAccountExist(
 	queryAccount := queryAccountResult[0]
 	return AccountResponse.AccountResponse{
 		AccountBasicResponse: AccountResponse.CreateBasicResponseSuccess(),
-		Account: AccountModule.AccountDatabaseModel{
+		Account: AccountModule.AccountModel{
 			ID:           queryAccount.ID.Hex(),
 			Account:      queryAccount.Account,
 			Password:     queryAccount.Password,

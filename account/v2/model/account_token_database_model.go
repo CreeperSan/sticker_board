@@ -2,7 +2,7 @@ package AccountV2
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type AccountTokenModel struct {
+type AccountTokenDatabaseModel struct {
 	ID          primitive.ObjectID `bson:"_id, omitempty"`
 	Token       string             `bson:"token"`
 	AccountID   string             `bson:"account_id"`
