@@ -7,7 +7,7 @@ type AccountTokenModel struct {
 	Token       string             `bson:"token"`
 	AccountID   string             `bson:"account_id"`
 	UpdateTime  int64              `bson:"update_time"`
-	Platform    int               `bson:"platform"`
+	Platform    int                `bson:"platform"`
 	Brand       string             `bson:"brand"`
 	DeviceName  string             `bson:"device_name"`
 	MachineCode string             `bson:"machine_code"`

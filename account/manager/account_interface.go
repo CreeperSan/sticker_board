@@ -27,7 +27,7 @@ type AccountInterface interface {
 
 
 	AuthToken(
-		accountID int,
+		accountID string,
 		token string,
 		platform int,
 		brand string,
@@ -37,7 +37,7 @@ type AccountInterface interface {
 
 
 	IsAccountExist(
-		accountID int,
+		accountID string,
 	) AccountModule.AccountResponse
 
 

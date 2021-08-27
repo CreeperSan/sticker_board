@@ -38,8 +38,9 @@ func (operator AccountOperator) Initialize(){
 
 	// Test method
 	//operator.RegisterAccount("account_01", "Aa123456", "UserName_01", "text_01@mail.com")
-	operator.LoginAccount("account_01", "Aa123456",  1, "Test Brand", "Test Device", "123456789012345678")
-
+	//operator.LoginAccount("account_01", "Aa123456",  1, "Test Brand", "Test Device", "123456789012345678")
+	//operator.AuthToken("6126e612a9192b1b0c9628be", "df245984-f653-4abb-a58c-3e9edd3642cb",  1, "Test Brand", "Test Device", "123456789012345678")
+	//operator.IsAccountExist("6126e612a9192b1b0c9628be")
 
 	LogService.Info("Initializing Account Module Succeed.")
 }
@@ -310,7 +311,7 @@ func (operator AccountOperator) LoginAccount(
 
 
 func (operator AccountOperator) AuthToken(
-	accountID int,
+	accountID string,
 	token string,
 	platform int,
 	brand string,
@@ -323,29 +324,122 @@ func (operator AccountOperator) AuthToken(
 	deviceName = strings.TrimSpace(deviceName)
 	machineCode = strings.TrimSpace(machineCode)
 
-	// TODO
 	// 1. Checkout whether the token is exist
-	//        - If exist, checkout whether the token is expired.
-	//              - If so, return failed.
-	//              - If not, return succeed and refresh expired time.
-	//        - If not, return failed.
-
-
+	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).Find(context.TODO(), bson.M{
+		"account_id" : accountID,
+		"token" : token,
+		"platform" : platform,
+		"brand" : brand,
+		"device_name" : deviceName,
+		"machine_code" : machineCode,
+	})
+	if err != nil {
+		return AccountResponse.AccountTokenResponse{
+			AccountBasicResponse: AccountResponse.CreateBasicResponseInternalErrorWithMessage(
+				"Error occur while checking token",
+			),
+		}
+	}
+	var tokenQueryResult []AccountV2Model.AccountTokenModel
+	err = cursor.All(context.TODO(), &tokenQueryResult)
+	if err != nil {
+		return AccountResponse.AccountTokenResponse{
+			AccountBasicResponse: AccountResponse.CreateBasicResponseInternalErrorWithMessage(
+				"Error occur while decoding token",
+			),
+		}
+	}
+	if len(tokenQueryResult) > 0 {
+		// 1.       - If existed, checkout whether the token is expired.
+		tokenQuery := tokenQueryResult[0]
+		currentMillisecond := Formatter.CurrentTimestampMillisecond()
+		if currentMillisecond > tokenQuery.ExpireTime {
+			// 1.             - If so, return failed.
+			return AccountResponse.AccountTokenResponse{
+				AccountBasicResponse: AccountResponse.CreateBasicResponseTokenExpired(),
+			}
+		} else {
+			// 1.             - If not, return succeed and refresh expired time.
+			updateResult, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).UpdateMany(context.TODO(), bson.M{
+				"account_id" : accountID,
+				"token" : token,
+				"platform" : platform,
+				"brand" : brand,
+				"device_name" : deviceName,
+				"machine_code" : machineCode,
+			}, bson.M{
+				"$set" : bson.M{
+					"expire_time" : currentMillisecond + _tokenEffectTimeMillisecond,
+				},
+			})
+			if err!=nil {
+				LogService.Warming("Error occur while updating token's expired time. Err = ", err)
+			}
+			LogService.Info("Token's expired time has been update. Token = ", token, " updateResult =", updateResult)
+			return AccountResponse.AccountTokenResponse{
+				AccountBasicResponse : AccountResponse.CreateBasicResponseSuccess(),
+			}
+		}
+	}
+	// 1.       - If not, return failed.
 	return AccountResponse.AccountTokenResponse{
-		AccountBasicResponse: AccountResponse.CreateBasicResponseTodo(),
+		AccountBasicResponse: AccountResponse.CreateBasicResponseTokenExpired(),
 	}
 }
 
 
 func (operator AccountOperator) IsAccountExist(
-	accountID int,
+	accountID string,
 ) AccountResponse.AccountResponse {
 
-	// TODO
-	// 1. Checkout whether the account is exist.
-
+	// 1. Checkout whether the account is existed.
+	accountIDQuery, err := primitive.ObjectIDFromHex(accountID)
+	if err != nil {
+		return AccountResponse.AccountResponse{
+			AccountBasicResponse: AccountResponse.CreateBasicResponseInternalErrorWithMessage(
+				"AccountID not correct",
+			),
+		}
+	}
+	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).Find(context.TODO(), bson.M{
+		"_id" : accountIDQuery,
+	})
+	if err != nil {
+		return AccountResponse.AccountResponse{
+			AccountBasicResponse: AccountResponse.CreateBasicResponseInternalErrorWithMessage(
+				"Error occur while finding account",
+			),
+		}
+	}
+	var queryAccountResult []AccountV2Model.AccountModel
+	err = cursor.All(context.TODO(), &queryAccountResult)
+	if err != nil {
+		return AccountResponse.AccountResponse{
+			AccountBasicResponse: AccountResponse.CreateBasicResponseInternalErrorWithMessage(
+				"Error occur while parsing account",
+			),
+		}
+	}
+	if len(queryAccountResult) <= 0 {
+		return AccountResponse.AccountResponse{
+			AccountBasicResponse: AccountResponse.CreateBasicResponseParamsErrorWithMessage(
+				"Account not exist",
+			),
+		}
+	}
+	queryAccount := queryAccountResult[0]
 	return AccountResponse.AccountResponse{
-		AccountBasicResponse: AccountResponse.CreateBasicResponseTodo(),
+		AccountBasicResponse: AccountResponse.CreateBasicResponseSuccess(),
+		Account: AccountModule.AccountDatabaseModel{
+			ID:           queryAccount.ID.Hex(),
+			Account:      queryAccount.Account,
+			Password:     queryAccount.Password,
+			Username:     queryAccount.Username,
+			RegisterTime: queryAccount.RegisterTime,
+			Avatar:       queryAccount.Avatar,
+			Email:        queryAccount.Email,
+			Type:         queryAccount.Type,
+		},
 	}
 }
 

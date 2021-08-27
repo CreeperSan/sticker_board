@@ -66,3 +66,10 @@ func CreateBasicResponseUnhandledError() AccountBasicResponse {
 		Message: "Unhandled error occurred",
 	}
 }
+
+func CreateBasicResponseTokenExpired() AccountBasicResponse {
+	return AccountBasicResponse{
+		Code: Code.ResponseCodeTokenExpired,
+		Message: "Login expired",
+	}
+}
