@@ -35,7 +35,7 @@ func ConnectDB() (mongoClient *mongo.Client, mongoDB *mongo.Database) {
 	}
 
 	//uri := "mongodb+srv://"+mongodbDatabaseAddress+":"+mongodbDatabasePort
-	uri := "mongodb://"+mongodbDatabaseAddress+":"+mongodbDatabasePort
+	uri := "mongodb://"+ mongodbDatabaseAddress +":"+ mongodbDatabasePort
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 

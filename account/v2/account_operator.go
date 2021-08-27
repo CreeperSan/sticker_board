@@ -13,8 +13,8 @@ import (
 	AccountModule "sticker_board/account/manager/model"
 	AccountResponse "sticker_board/account/manager/response"
 	AccountV2Model "sticker_board/account/v2/model"
-	AccountV2DB "sticker_board/account/v2/mongodb"
 	StickerBoard "sticker_board/application/const"
+	"sticker_board/application/mongodb"
 	Formatter "sticker_board/lib/formatter"
 	"sticker_board/lib/log_service"
 	"strings"
@@ -27,11 +27,11 @@ func (operator AccountOperator) Initialize(){
 	LogService.Info("Initializing Account Module ...")
 	AccountV2DB.ConnectDB()
 	// Check the database connection
-	if AccountV2DB.MongoClient==nil || AccountV2DB.MongoDB == nil{
+	if AccountV2DB.MongoClient ==nil || AccountV2DB.MongoDB == nil{
 		LogService.Error("Initializing Account Module Failed! Can not connect to mongoDB.")
 		os.Exit(StickerBoard.ExitCodeDatabaseCreateClientConnectionFailed)
 	}
-	if err:=AccountV2DB.MongoClient.Ping(context.TODO(), readpref.Primary()); err != nil {
+	if err:= AccountV2DB.MongoClient.Ping(context.TODO(), readpref.Primary()); err != nil {
 		LogService.Error("Initializing Account Module Failed! Can not ping mongoDB. err =", err)
 		os.Exit(StickerBoard.ExitCodeDatabasePingFailed)
 	}
