@@ -2,11 +2,10 @@ package ApiV1
 
 import (
 	"github.com/kataras/iris/v12"
-	StickerBoardConst "sticker_board/account/v1/const"
-	StickerBoardAccount "sticker_board/account/v1/database"
+	AccountModule "sticker_board/account/manager"
 	ApiMiddleware "sticker_board/api/middleware"
+	"sticker_board/application/formatter"
 	Formatter "sticker_board/lib/formatter"
-	LogService "sticker_board/lib/log_service"
 	"strings"
 )
 
@@ -24,15 +23,15 @@ func login(ctx iris.Context)  {
 	type RequestParams struct {
 		Account  string `json:"account"`
 		Password string `json:"password"`
-		Platform int8 `json:"platform"`
+		Platform int `json:"platform"`
 		Brand string `json:"brand"`
 		DeviceName string `json:"device_name"`
 		MachineCode string `json:"machine_code"`
 	}
 	type ResponseParamsData struct {
-		Token         string `json:"token"`
-		EffectiveTime int64  `json:"effective_time"`
-		UID           uint   `json:"uid"`
+		Token       string `json:"token"`
+		ExpiredTime int64  `json:"expired_time"`
+		UID         string `json:"uid"`
 	}
 	type ResponseParams struct {
 		Code    int                `json:"code"`
@@ -51,8 +50,8 @@ func login(ctx iris.Context)  {
 	}
 
 	// Check whether the params is valid
-	if requestParams.Platform <= StickerBoardConst.PlatformUndefined ||
-		requestParams.Platform > StickerBoardConst.PlatformBrowser ||
+
+	if  !ApplicationFormatter.IsPlatformValid(requestParams.Platform) ||
 		!Formatter.CheckStringWithLength(strings.TrimSpace(requestParams.Brand), 1, 64) ||
 		!Formatter.CheckStringWithLength(strings.TrimSpace(requestParams.DeviceName), 1, 64) ||
 		len(strings.TrimSpace(requestParams.MachineCode))!= 18 {
@@ -66,18 +65,17 @@ func login(ctx iris.Context)  {
 
 
 	// Login
-	loginResponse := StickerBoardAccount.LoginAccount(requestParams.Account, requestParams.Password,
+	loginResponse := AccountModule.GetOperator().LoginAccount(requestParams.Account, requestParams.Password,
 		requestParams.Platform, requestParams.Brand, requestParams.DeviceName, requestParams.MachineCode)
-	LogService.Info(loginResponse)
 
 	// return data to client
 	ctx.JSON(ResponseParams{
 		Code:    loginResponse.Code,
 		Message: loginResponse.Message,
 		Data: ResponseParamsData{
-			Token:         loginResponse.Token,
-			EffectiveTime: loginResponse.EffectiveTime,
-			UID:           loginResponse.UID,
+			Token:       loginResponse.Token,
+			ExpiredTime: loginResponse.ExpireTime,
+			UID:         loginResponse.AccountID,
 		},
 	})
 }
@@ -106,7 +104,7 @@ func register(ctx iris.Context)  {
 	}
 
 	// Register
-	registerResponse := StickerBoardAccount.RegisterAccount(requestParams.Account, requestParams.Password,
+	registerResponse := AccountModule.GetOperator().RegisterAccount(requestParams.Account, requestParams.Password,
 		requestParams.UserName, requestParams.Email)
 
 
@@ -127,7 +125,7 @@ func authToken(ctx iris.Context)  {
 	authResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
 
 	// Auth Code
-	authResponse := StickerBoardAccount.AuthToken(authResult.AccountID, authResult.Token, authResult.Platform,
+	authResponse := AccountModule.GetOperator().AuthToken(authResult.AccountID, authResult.Token, authResult.Platform,
 		authResult.Brand, authResult.DeviceName, authResult.MachineCode)
 
 	// return data to client

@@ -57,7 +57,8 @@ func createCategory(ctx iris.Context){
 		})
 	}
 
-	StickerDatabase.CreateCategory(authResult.AccountID, 0, requestParams.CategoryName, requestParams.Icon, requestParams.Color, "")
+	// TODO
+	//StickerDatabase.CreateCategory(authResult.AccountID, 0, requestParams.CategoryName, requestParams.Icon, requestParams.Color, "")
 
 	ctx.JSON(ResponseParams{
 		Code: 200,

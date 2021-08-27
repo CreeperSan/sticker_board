@@ -2,13 +2,13 @@ package ApiMiddleware
 
 import (
 	"github.com/kataras/iris/v12"
-	"sticker_board/account/v1/database"
+	AccountModule "sticker_board/account/manager"
 	"strconv"
 )
 
 type AuthAccountMiddlewareResult struct {
 	Token                 string
-	AccountID             uint
+	AccountID             string
 	UpdateTime            int64
 	ExpireTimeMilliSecond int64
 	Platform              int
@@ -23,6 +23,7 @@ func AuthAccountMiddleware(ctx iris.Context) {
 		Message string `json:"message"`
 	}
 
+	uid := ctx.GetHeader("sticker-board-uid")
 	token := ctx.GetHeader("sticker-board-token")
 	brand := ctx.GetHeader("sticker-board-brand")
 	deviceName := ctx.GetHeader("sticker-board-device-name")
@@ -31,15 +32,12 @@ func AuthAccountMiddleware(ctx iris.Context) {
 	if convertPlatformErr != nil {
 		platform = 0
 	}
-	uid, convertUIDErr := strconv.Atoi(ctx.GetHeader("sticker-board-uid"))
-	if convertUIDErr != nil {
-		uid = -1
-	}
 
-	authTokenResult := Account.AuthToken(uint(uint64(uid)), token, platform, brand, deviceName, machineCode)
+	accountOperator := AccountModule.GetOperator()
+	authTokenResult := accountOperator.AuthToken(uid, token, platform, brand, deviceName, machineCode)
 
 	// if token auth error or token account id not the same as request header's uid
-	if authTokenResult.Code != 200 {
+	if authTokenResult.IsSuccess() {
 		ctx.JSON(ResponseParams{
 			Code: 401,
 			Message: "Login expired, please login in again",
@@ -55,7 +53,7 @@ func AuthAccountMiddleware(ctx iris.Context) {
 		Brand:                 brand,
 		DeviceName:            deviceName,
 		MachineCode:           machineCode,
-		ExpireTimeMilliSecond: authTokenResult.ExpireTimeMilliSecond,
+		ExpireTimeMilliSecond: authTokenResult.ExpireTime,
 		UpdateTime:            authTokenResult.UpdateTime,
 	})
 
