@@ -1,5 +1,7 @@
 package StickerModule
 
+import StickerModuleResponse "sticker_board/sticker/manager/response"
+
 type StickerInterface interface {
 
 	Initialize()
@@ -7,20 +9,20 @@ type StickerInterface interface {
 
 	// Sticker Tag
 
-	CreateTag()
+	CreateTag(accountID string, name string, icon string, color int) StickerModuleResponse.StickerTagResponse
 
-	DeleteTag()
+	DeleteTag(accountID string, tagID string) StickerModuleResponse.StickerResponse
 
-	FindAllTag()
+	FindAllTag(accountID string) StickerModuleResponse.StickerTagArrayResponse
 
 
 	// Sticker Category
 
-	CreateCategory()
+	CreateCategory(accountID string, parentCategoryID string, name string, icon string, color int) StickerModuleResponse.StickerCategoryResponse
 
-	DeleteCategory()
+	DeleteCategory(accountID string, categoryID string) StickerModuleResponse.StickerResponse
 
-	FindAllCategory()
+	FindAllCategory(accountID string) StickerModuleResponse.StickerCategoryArrayResponse
 
 
 	// Sticker
