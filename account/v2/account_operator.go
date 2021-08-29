@@ -25,13 +25,13 @@ type AccountOperator struct { }
 
 func (operator AccountOperator) Initialize(){
 	LogService.Info("Initializing Account Module ...")
-	AccountV2DB.ConnectDB()
+	ApplicationDB.ConnectDB()
 	// Check the database connection
-	if AccountV2DB.MongoClient ==nil || AccountV2DB.MongoDB == nil{
+	if ApplicationDB.MongoClient ==nil || ApplicationDB.MongoDB == nil{
 		LogService.Error("Initializing Account Module Failed! Can not connect to mongoDB.")
 		os.Exit(StickerBoard.ExitCodeDatabaseCreateClientConnectionFailed)
 	}
-	if err:= AccountV2DB.MongoClient.Ping(context.TODO(), readpref.Primary()); err != nil {
+	if err:= ApplicationDB.MongoClient.Ping(context.TODO(), readpref.Primary()); err != nil {
 		LogService.Error("Initializing Account Module Failed! Can not ping mongoDB. err =", err)
 		os.Exit(StickerBoard.ExitCodeDatabasePingFailed)
 	}
@@ -95,7 +95,7 @@ func (operator AccountOperator) RegisterAccount(
 
 	// 1. Find out whether this account has been registered
 	var queryResult []AccountV2Model.AccountDatabaseModel
-	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).Find(context.TODO(), bson.M{
+	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccount).Find(context.TODO(), bson.M{
 		"account": account,
 	})
 	if err != nil {
@@ -121,7 +121,7 @@ func (operator AccountOperator) RegisterAccount(
 	}
 
 	// 2. Find out whether this email has been used
-	cursor, err = AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).Find(context.TODO(), bson.M{
+	cursor, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccount).Find(context.TODO(), bson.M{
 		"email": email,
 	})
 	if err != nil {
@@ -157,7 +157,7 @@ func (operator AccountOperator) RegisterAccount(
 		Email:        email,
 		Type:         1,
 	}
-	_, err = AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).InsertOne(context.TODO(), writeAccount)
+	_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccount).InsertOne(context.TODO(), writeAccount)
 	if err != nil {
 		return AccountResponse.AccountResponse{
 			AccountBasicResponse: AccountResponse.CreateBasicResponseInternalErrorWithMessage(
@@ -198,7 +198,7 @@ func (operator AccountOperator) LoginAccount(
 
 	// 1. Find out is there an account match the condition
 	var queryAccountResult []AccountV2Model.AccountDatabaseModel
-	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).Find(context.TODO(), bson.M{
+	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccount).Find(context.TODO(), bson.M{
 		"account" : account,
 		"password" : password,
 	})
@@ -227,7 +227,7 @@ func (operator AccountOperator) LoginAccount(
 	// 2. Checkout the token is already reach the limit of token count
 	var accountModel = queryAccountResult[0] // The account that login
 	var queryTokenResult []AccountV2Model.AccountTokenDatabaseModel
-	cursor, err = AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).Find(context.TODO(), bson.M{
+	cursor, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccountToken).Find(context.TODO(), bson.M{
 		"account_id" : accountModel.ID.Hex(),
 	}, &options.FindOptions{
 		Sort: bson.M{
@@ -253,7 +253,7 @@ func (operator AccountOperator) LoginAccount(
 		var i int
 		for i=_maxTokenPerAccount-1; i<len(queryTokenResult); i++ {
 			tmpTokenModel := queryTokenResult[i]
-			one, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).DeleteOne(context.TODO(), bson.M{
+			one, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccountToken).DeleteOne(context.TODO(), bson.M{
 				"_id": tmpTokenModel.ID,
 			})
 			if err != nil {
@@ -284,7 +284,7 @@ func (operator AccountOperator) LoginAccount(
 		MachineCode: machineCode,
 		ExpireTime:  currentMillisecond + _tokenEffectTimeMillisecond,
 	}
-	_, err = AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).InsertOne(context.TODO(), generateTokenModel)
+	_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccountToken).InsertOne(context.TODO(), generateTokenModel)
 	if err != nil {
 		LogService.Warming("Error occur while adding token into database, err =", err)
 		return AccountResponse.AccountTokenResponse{
@@ -325,7 +325,7 @@ func (operator AccountOperator) AuthToken(
 	machineCode = strings.TrimSpace(machineCode)
 
 	// 1. Checkout whether the token is exist
-	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).Find(context.TODO(), bson.M{
+	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccountToken).Find(context.TODO(), bson.M{
 		"account_id" : accountID,
 		"token" : token,
 		"platform" : platform,
@@ -360,7 +360,7 @@ func (operator AccountOperator) AuthToken(
 			}
 		} else {
 			// 1.             - If not, return succeed and refresh expired time.
-			updateResult, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccountToken).UpdateMany(context.TODO(), bson.M{
+			updateResult, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccountToken).UpdateMany(context.TODO(), bson.M{
 				"account_id" : accountID,
 				"token" : token,
 				"platform" : platform,
@@ -401,7 +401,7 @@ func (operator AccountOperator) IsAccountExist(
 			),
 		}
 	}
-	cursor, err := AccountV2DB.MongoDB.Collection(AccountV2DB.CollectionAccount).Find(context.TODO(), bson.M{
+	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccount).Find(context.TODO(), bson.M{
 		"_id" : accountIDQuery,
 	})
 	if err != nil {
