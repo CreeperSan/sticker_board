@@ -102,7 +102,7 @@ func (operator *StickerOperator) FindAllTag (accountID string) StickerModuleResp
 
 	// 2. Find all tags in database
 	var queryResult []StickerV2Model.TagDatabaseModel
-	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionStickerTag).Find(context.TODO(), &queryResult)
+	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionStickerTag).Find(context.TODO(), bson.M{})
 	if err!=nil {
 		return StickerModuleResponse.StickerTagArrayResponse{
 			StickerResponse: StickerModuleResponse.CreateInternalErrorResponseWithMessage(
@@ -120,9 +120,8 @@ func (operator *StickerOperator) FindAllTag (accountID string) StickerModuleResp
 		}
 	}
 
-	var returnResult [len(queryResult)] StickerModuleModel.TagModel
-
 	return StickerModuleResponse.StickerTagArrayResponse{
-		StickerResponse : StickerModuleResponse.CreateTodoResponse(),
+		StickerResponse : StickerModuleResponse.CreateSuccessResponse(),
+		Tags: queryResult,
 	}
 }

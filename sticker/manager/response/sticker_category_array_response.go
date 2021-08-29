@@ -1,8 +1,10 @@
 package StickerModuleResponse
 
-import StickerModuleModel "sticker_board/sticker/manager/model"
+import (
+	StickerV2Model "sticker_board/sticker/v2/model"
+)
 
 type StickerCategoryArrayResponse struct {
 	StickerResponse
-	Categories []StickerModuleModel.CategoryModel
+	Categories []StickerV2Model.CategoryDatabaseModel
 }
