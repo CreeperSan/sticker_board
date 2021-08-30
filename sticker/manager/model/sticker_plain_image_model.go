@@ -2,6 +2,6 @@ package StickerModuleModel
 
 type StickerPlainImageModel struct {
 	StickerBasicModel
-	Url         string
-	Description string
+	Url         string `json:"url"`
+	Description string `json:"description"`
 }

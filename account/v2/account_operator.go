@@ -360,6 +360,7 @@ func (operator AccountOperator) AuthToken(
 			}
 		} else {
 			// 1.             - If not, return succeed and refresh expired time.
+			newExpireTime := currentMillisecond + _tokenEffectTimeMillisecond
 			updateResult, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionAccountToken).UpdateMany(context.TODO(), bson.M{
 				"account_id" : accountID,
 				"token" : token,
@@ -369,7 +370,7 @@ func (operator AccountOperator) AuthToken(
 				"machine_code" : machineCode,
 			}, bson.M{
 				"$set" : bson.M{
-					"expire_time" : currentMillisecond + _tokenEffectTimeMillisecond,
+					"expire_time" : newExpireTime,
 				},
 			})
 			if err!=nil {
@@ -378,6 +379,17 @@ func (operator AccountOperator) AuthToken(
 			LogService.Info("Token's expired time has been update. Token = ", token, " updateResult =", updateResult)
 			return AccountResponse.AccountTokenResponse{
 				AccountBasicResponse : AccountResponse.CreateBasicResponseSuccess(),
+				AccountTokenModel : AccountModule.AccountTokenModel{
+					ID: tokenQuery.ID.Hex(),
+					Token: tokenQuery.Token,
+					AccountID: tokenQuery.AccountID,
+					UpdateTime: currentMillisecond,
+					Platform: tokenQuery.Platform,
+					Brand: tokenQuery.Brand,
+					DeviceName: tokenQuery.DeviceName,
+					MachineCode: tokenQuery.MachineCode,
+					ExpireTime: newExpireTime,
+				},
 			}
 		}
 	}

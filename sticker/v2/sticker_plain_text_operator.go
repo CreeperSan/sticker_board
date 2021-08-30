@@ -8,6 +8,7 @@ import (
 	ApplicationDB "sticker_board/application/mongodb"
 	Formatter "sticker_board/lib/formatter"
 	StickerModuleConst "sticker_board/sticker/manager/const"
+	StickerModuleModel "sticker_board/sticker/manager/model"
 	StickerModuleResponse "sticker_board/sticker/manager/response"
 	StickerV2Model "sticker_board/sticker/v2/model"
 )
@@ -79,5 +80,20 @@ func (operator *StickerOperator) CreatePlainTextSticker(
 
 	return StickerModuleResponse.StickerSingleResponse{
 		StickerResponse: StickerModuleResponse.CreateSuccessResponse(),
+		Sticker: StickerModuleModel.StickerPlainTextModel{
+			StickerBasicModel : StickerModuleModel.StickerBasicModel{
+				ID: insertSticker.ID.Hex(),
+				Type: insertSticker.Type,
+				AccountID: insertSticker.AccountID,
+				Star: insertSticker.Star,
+				IsPinned: insertSticker.IsPinned,
+				Status: insertSticker.Status,
+				Title: insertSticker.Title,
+				Background: insertSticker.Background,
+				CreateTime: insertSticker.CreateTime,
+				UpdateTime: insertSticker.UpdateTime,
+			},
+			Text: insertSticker.PlainText,
+		},
 	}
 }

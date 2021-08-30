@@ -113,7 +113,7 @@ func (operator *StickerOperator) FindSticker (accountID string, page int, pageSi
 			})
 			break
 		}
-		case StickerModuleConst.StickerTypePlainSound:{}
+		case StickerModuleConst.StickerTypePlainSound:{
 			stickerModelArray = append(stickerModelArray, StickerModuleModel.StickerPlainSoundModel{
 				StickerBasicModel : basicModel,
 				Url: databaseModel.PlainSoundUrl,
@@ -121,6 +121,7 @@ func (operator *StickerOperator) FindSticker (accountID string, page int, pageSi
 				Duration: databaseModel.PlainSoundDuration,
 			})
 			break
+		}
 		}
 	}
 	return StickerModuleResponse.StickerArrayResponse{

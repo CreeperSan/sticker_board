@@ -2,5 +2,5 @@ package StickerModuleModel
 
 type StickerPlainTextModel struct {
 	StickerBasicModel
-	Text string
+	Text string `json:"text"`
 }

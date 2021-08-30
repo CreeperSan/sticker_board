@@ -37,7 +37,7 @@ func AuthAccountMiddleware(ctx iris.Context) {
 	authTokenResult := accountOperator.AuthToken(uid, token, platform, brand, deviceName, machineCode)
 
 	// if token auth error or token account id not the same as request header's uid
-	if authTokenResult.IsSuccess() {
+	if !authTokenResult.IsSuccess() {
 		ctx.JSON(ResponseParams{
 			Code: 401,
 			Message: "Login expired, please login in again",
