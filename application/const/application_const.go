@@ -14,7 +14,14 @@ const SPMongoDBDatabasePort = prefix + "mongodb_database_port"
 const SPMongoDBDatabaseUsername = prefix + "mongodb_database_username"
 const SPMongoDBDatabasePassword = prefix + "mongodb_database_password"
 
+const SPOSSAlicloudEndpoint = prefix + "oss_alicloud_endpoint"
+const SPOSSAlicloudAccessKeyID = prefix + "oss_alicloud_access_key_id"
+const SPOSSAlicloudAccessKeySecret = prefix + "oss_alicloud_access_key_secret"
+const SPOSSAlicloudBucket = prefix + "oss_alicloud_bucket"
+
 const ExitCodeNormal = 0
 const ExitCodeDatabaseCreateClientConnectionFailed = 1
 const ExitCodeDatabasePingFailed = 2
 const ExitCodeDatabaseCreateCollectionFailed = 3
+const ExitCodeAlicloudOSSCollectionFailed = 4
+const ExitCodeAlicloudOSSBucketCollectionFailed = 5

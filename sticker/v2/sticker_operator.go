@@ -12,5 +12,5 @@ func (operator *StickerOperator) Initialize () {
 	//operator.CreatePlainTextSticker("6126e612a9192b1b0c9628be", 0, false,
 	//	StickerModuleConst.StickerStatusProcessing, "Test Plain Text 02", "",
 	//	[]string{}, "", "xz564c56xz1cas4 5asd15a5s")
-	operator.FindSticker("6126e612a9192b1b0c9628be", 1, 1)
+	//operator.FindSticker("6126e612a9192b1b0c9628be", 1, 1)
 }
