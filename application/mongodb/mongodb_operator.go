@@ -12,6 +12,7 @@ import (
 )
 
 const CollectionAccount = "account"
+const CollectionSticker = "sticker"
 const CollectionStickerTag = "sticker_tag"
 const CollectionStickerCategory = "sticker_category"
 const CollectionAccountToken = "account_token"

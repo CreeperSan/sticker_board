@@ -27,11 +27,48 @@ type StickerInterface interface {
 
 	// Sticker
 
-	CreatePlainTextSticker()
+	CreatePlainTextSticker(
+		accountID string,
+		star int,
+		isPinned bool,
+		stickerStatus int,
+		title string,
+		background string,
+		tagIDs []string,
+		categoryID string,
+		text string,
+	) StickerModuleResponse.StickerSingleResponse
 
-	DeleteSticker()
+	CreatePlainImageSticker(
+		accountID string,
+		star int,
+		isPinned bool,
+		stickerStatus int,
+		title string,
+		background string,
+		tagIDs []string,
+		categoryID string,
+		imageUrl string,
+		imageDescription string,
+	) StickerModuleResponse.StickerSingleResponse
 
-	FindSticker()
+	CreatePlainSoundSticker(
+		accountID string,
+		star int,
+		isPinned bool,
+		stickerStatus int,
+		title string,
+		background string,
+		tagIDs []string,
+		categoryID string,
+		soundUrl string,
+		soundDescription string,
+		soundDuration int,
+	) StickerModuleResponse.StickerSingleResponse
+
+	DeleteSticker(accountID string, stickerID string) StickerModuleResponse.StickerResponse
+
+	FindSticker(accountID string, page int, pageSize int) StickerModuleResponse.StickerArrayResponse
 
 }
 
