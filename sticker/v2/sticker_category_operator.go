@@ -125,8 +125,20 @@ func (operator StickerOperator) FindAllCategory (
 		}
 	}
 
+	var dataList []StickerModuleModel.CategoryModel
+	for _, tmpItem := range queryResult {
+		dataList = append(dataList, StickerModuleModel.CategoryModel{
+			ID: tmpItem.ID.Hex(),
+			CreateTime: tmpItem.CreateTime,
+			UpdateTime: tmpItem.UpdateTime,
+			Name: tmpItem.Name,
+			Icon: tmpItem.Icon,
+			Color: tmpItem.Color,
+		})
+	}
+
 	return StickerModuleResponse.StickerCategoryArrayResponse{
 		StickerResponse : StickerModuleResponse.CreateSuccessResponse(),
-		Categories: queryResult,
+		Categories: dataList,
 	}
 }

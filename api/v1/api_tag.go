@@ -102,7 +102,6 @@ func queryTagList(ctx iris.Context){
 		Name       string `json:"name"`
 		Icon       string `json:"icon"`
 		Color      int    `json:"color"`
-		Sort       int    `json:"sort"`
 	}
 	type ResponseParams struct {
 		Code    int                  `json:"code"`
@@ -125,13 +124,12 @@ func queryTagList(ctx iris.Context){
 	var dataList []ResponseParamsItem
 	for _, tmpItem := range queryResult.Tags {
 		dataList = append(dataList, ResponseParamsItem{
-			TagID: tmpItem.ID.Hex(),
+			TagID: tmpItem.ID,
 			CreateTime: tmpItem.CreateTime,
 			UpdateTime: tmpItem.UpdateTime,
 			Name: tmpItem.Name,
 			Icon: tmpItem.Icon,
 			Color: tmpItem.Color,
-			Sort: tmpItem.Sort,
 		})
 	}
 

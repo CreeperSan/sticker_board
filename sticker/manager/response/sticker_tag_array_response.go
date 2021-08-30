@@ -1,10 +1,10 @@
 package StickerModuleResponse
 
 import (
-	StickerV2Model "sticker_board/sticker/v2/model"
+	StickerModuleModel "sticker_board/sticker/manager/model"
 )
 
 type StickerTagArrayResponse struct {
 	StickerResponse
-	Tags []StickerV2Model.TagDatabaseModel
+	Tags []StickerModuleModel.TagModel
 }

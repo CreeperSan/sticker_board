@@ -120,8 +120,20 @@ func (operator *StickerOperator) FindAllTag (accountID string) StickerModuleResp
 		}
 	}
 
+	var dataList []StickerModuleModel.TagModel
+	for _, tmpItem := range queryResult {
+		dataList = append(dataList, StickerModuleModel.TagModel{
+			ID: tmpItem.ID.Hex(),
+			CreateTime: tmpItem.CreateTime,
+			UpdateTime: tmpItem.UpdateTime,
+			Name: tmpItem.Name,
+			Icon: tmpItem.Icon,
+			Color: tmpItem.Color,
+		})
+	}
+
 	return StickerModuleResponse.StickerTagArrayResponse{
 		StickerResponse : StickerModuleResponse.CreateSuccessResponse(),
-		Tags: queryResult,
+		Tags: dataList,
 	}
 }
