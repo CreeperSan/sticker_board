@@ -148,7 +148,6 @@ func createPlainImageSticker(ctx iris.Context){
 		})
 		return
 	}
-	OSSAlicloud.UploadFile()
 
 
 	// TODO

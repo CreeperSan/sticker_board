@@ -17,6 +17,7 @@ func Initialize()  {
 	ApiV1.InitializeStickerPlainText(app)
 	ApiV1.InitializeStickerPlainImage(app)
 	ApiV1.InitializeQuery(app)
+	ApiV1.InitializeOSS(app)
 
 	startServerError := app.Listen(":8080")
 	if startServerError != nil {

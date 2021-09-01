@@ -19,6 +19,9 @@ const SPOSSAlicloudAccessKeyID = prefix + "oss_alicloud_access_key_id"
 const SPOSSAlicloudAccessKeySecret = prefix + "oss_alicloud_access_key_secret"
 const SPOSSAlicloudBucket = prefix + "oss_alicloud_bucket"
 
+const SPServeDomain = prefix + "server_domain"
+const SPServePort = prefix + "server_port"
+
 const ExitCodeNormal = 0
 const ExitCodeDatabaseCreateClientConnectionFailed = 1
 const ExitCodeDatabasePingFailed = 2
