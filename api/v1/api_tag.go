@@ -113,7 +113,7 @@ func queryTagList(ctx iris.Context){
 
 	queryResult := StickerModule.GetOperator().FindAllTag(authResult.AccountID)
 
-	if queryResult.IsSuccess() {
+	if !queryResult.IsSuccess() {
 		ctx.JSON(ResponseParams{
 			Code: queryResult.Code,
 			Message: queryResult.Message,
@@ -121,7 +121,7 @@ func queryTagList(ctx iris.Context){
 		return
 	}
 
-	var dataList []ResponseParamsItem
+	dataList := []ResponseParamsItem{}
 	for _, tmpItem := range queryResult.Tags {
 		dataList = append(dataList, ResponseParamsItem{
 			TagID: tmpItem.ID,

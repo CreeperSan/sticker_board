@@ -45,7 +45,7 @@ func getOSSSignature(ctx iris.Context){
 
 // Calls by OSS when client finished upload file to OSS
 func notifyFileUploaded(ctx iris.Context){
-	LogService.Info("收到了阿里云OSS的调用")
+	LogService.Info("Receive AliCloud OSS Response")
 
 	bytePublicKey, err := getPublicKey(ctx.Request())
 	if err != nil {

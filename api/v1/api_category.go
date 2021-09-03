@@ -121,7 +121,7 @@ func queryCategoryList(ctx iris.Context){
 		return
 	}
 
-	var dataList []ResponseParamsItem
+	dataList := []ResponseParamsItem{}
 	for _, tmpItem := range categoriesListResult.Categories {
 		dataList = append(dataList, ResponseParamsItem{
 			CategoryID: tmpItem.ID,
