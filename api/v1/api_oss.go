@@ -33,11 +33,28 @@ func InitializeOSS(app *iris.Application){
 }
 
 // Call by client request signature to upload files to OSS
+type GetSignatureQueryParams struct {
+	Action string `json:"action"`
+}
+
 func getOSSSignature(ctx iris.Context){
+	// Parse params
+	queryParams := GetSignatureQueryParams{}
+	err := ctx.ReadQuery(&queryParams)
+	if err != nil {
+		LogService.Warming("Error occur while requesting oss signature, request params error.")
+		ctx.WriteString("{\"error\":\"Query params error, need action.\"}")
+		return
+	}
+	// checkout action in query params is error
+	ossDirPath := getUploadDirectoryPath(ctx, queryParams)
+	if len(ossDirPath)<=0 {
+		LogService.Warming("Error occur while requesting oss signature, action error.")
+		ctx.WriteString("{\"error\":\"Query params error, action error.\"}")
+		return
+	}
 
-	ctx.Next()
-
-	response := get_policy_token()
+	response := get_policy_token(ctx, ossDirPath)
 	ctx.Header("Access-Control-Allow-Methods", "POST")
 	ctx.Header("Access-Control-Allow-Origin", "*")
 	ctx.WriteString(response)
@@ -69,7 +86,17 @@ func notifyFileUploaded(ctx iris.Context){
 	if (verifySignature(bytePublicKey, byteMD5, byteAuthorization)) {
 		// do something you want accoding to callback_body ...
 
-		ctx.ResponseWriter().WriteHeader(http.StatusOK)  // re0sponse OK : 200
+		fmt.Println("OSS Callback Form ->")
+		fmt.Println(ctx.Request().Form)
+		var bodyBytes []byte
+		ctx.Request().Body.Read(bodyBytes)
+		fmt.Println("OSS Callback Body ->")
+		fmt.Println(string(bodyBytes))
+		//fmt.Println("OSS Callback Body Obj ->")
+		//fmt.Println(ctx.Request().GetBody)
+
+		//ctx.ResponseWriter().WriteHeader(http.StatusOK)  // response OK : 200
+		ctx.ResponseWriter().WriteString("{\"Status\":\"OK\"}")
 	} else {
 		ctx.ResponseWriter().WriteHeader(http.StatusBadRequest) // response FAILED : 400
 	}
@@ -96,12 +123,20 @@ func getOSSExpireTime() int64 {
 	return 30
 }
 
+const GetSignatureQueryParamsAction_CreateStickerPlainImage = "create_sticker_plain_image"
+func getUploadDirectoryPath(ctx iris.Context, queryParams GetSignatureQueryParams) string {
+	accountResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
+	switch queryParams.Action {
+	case GetSignatureQueryParamsAction_CreateStickerPlainImage:
+		return "sticker_board/user/"+accountResult.AccountID+"/sticker/plain_image/"
+	}
+	return ""
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// 	The following code below is copy from AliCloud OSS Demo with a little modification
 ///
-
-var upload_dir string = "user-dir-prefix/"
 
 type ConfigStruct struct{
 	Expiration string `json:"expiration"`
@@ -120,6 +155,7 @@ type PolicyToken struct{
 
 type CallbackParam struct{
 	CallbackUrl string `json:"callbackUrl"`
+	CallbackHost string `json:"callbackHost"`
 	CallbackBody string `json:"callbackBody"`
 	CallbackBodyType string `json:"callbackBodyType"`
 }
@@ -130,7 +166,9 @@ func get_gmt_iso8601(expire_end int64) string {
 }
 
 
-func get_policy_token() string {
+func get_policy_token(ctx iris.Context, ossDirectoryPath string) string {
+	uploadDirectoryPath := ossDirectoryPath
+
 	now := time.Now().Unix()
 	expire_end := now + getOSSExpireTime()
 	var tokenExpire = get_gmt_iso8601(expire_end)
@@ -141,7 +179,7 @@ func get_policy_token() string {
 	var condition []string
 	condition = append(condition, "starts-with")
 	condition = append(condition, "$key")
-	condition = append(condition, upload_dir)
+	condition = append(condition, uploadDirectoryPath)
 	config.Conditions = append(config.Conditions, condition)
 
 	//calucate signature
@@ -151,10 +189,31 @@ func get_policy_token() string {
 	io.WriteString(h, debyte)
 	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
+	// Handle oss upload callback
+	// https://help.aliyun.com/document_detail/31989.htm?spm=a2c4g.11186623.0.0.1e8d54586XMtFd#reference-zkm-311-hgb
 	var callbackParam CallbackParam
 	callbackParam.CallbackUrl = getOSSCallbackHost()
+	//callbackParam.CallbackBody = "bucket=${bucket}&etag=${etag}&filename=${object}&size=${size}&mimeType=${mimeType}&imgHeight=${imageInfo.height}&imgWidth=${imageInfo.width}&imgFormat=${imageInfo.format}"
+	//callbackParam.CallbackBody = "filename=${object}&size=${size}&mimeType=${mimeType}"
+
+	callbackParam.CallbackHost = OSSAlicloud.Endpoint
 	callbackParam.CallbackBody = "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}"
 	callbackParam.CallbackBodyType = "application/x-www-form-urlencoded"
+
+	//type CallbackParams struct {
+	//	MIMEType string `json:"mimeType"`
+	//	Size string `json:"size"`
+	//}
+	//callbackParamsMarshal, err := json.Marshal(CallbackParams{
+	//	Size: "${size}",
+	//	MIMEType: "${mimeType}",
+	//})
+	//callbackParam.CallbackBodyType = "application/json"
+	//callbackParam.CallbackBody = string(callbackParamsMarshal)
+	//
+	//callbackParam.CallbackBody = "{\"num1\":1251}"
+	//callbackParam.CallbackBodyType = "application/json"
+
 	callback_str,err:=json.Marshal(callbackParam)
 	if err != nil {
 		fmt.Println("callback json err:", err)
@@ -166,7 +225,7 @@ func get_policy_token() string {
 	policyToken.Host = getOSSHost()
 	policyToken.Expire = expire_end
 	policyToken.Signature = string(signedStr)
-	policyToken.Directory = upload_dir
+	policyToken.Directory = uploadDirectoryPath
 	policyToken.Policy = string(debyte)
 	policyToken.Callback = string(callbackBase64)
 	response,err:=json.Marshal(policyToken)
