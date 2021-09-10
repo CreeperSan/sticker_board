@@ -61,6 +61,17 @@ func getOSSSignature(ctx iris.Context){
 }
 
 // Calls by OSS when client finished upload file to OSS
+type OSSRequestCallback struct {
+	Bucket      string `json:"bucket"`
+	File        string `json:"filename"`
+	ETag        string `json:"etag"`
+	Size        int    `json:"size"`
+	MIMEType    string `json:"mimeType"`
+	ImageHeight int    `json:"height"`
+	ImageWidth  int    `json:"width"`
+	ImageFormat string `json:"format"`
+	UID         string `json:"uid"`
+}
 func notifyFileUploaded(ctx iris.Context){
 	LogService.Info("Receive AliCloud OSS Response")
 
@@ -77,7 +88,7 @@ func notifyFileUploaded(ctx iris.Context){
 	}
 
 
-	byteMD5, err := getMD5FromNewAuthString(ctx.Request())
+	callbackString, byteMD5, err := getMD5FromNewAuthString(ctx.Request())
 	if (err != nil) {
 		ctx.ResponseWriter().WriteHeader(http.StatusBadRequest)
 		return
@@ -85,18 +96,21 @@ func notifyFileUploaded(ctx iris.Context){
 
 	if (verifySignature(bytePublicKey, byteMD5, byteAuthorization)) {
 		// do something you want accoding to callback_body ...
+		ossCallback := OSSRequestCallback{}
+		err := json.Unmarshal([]byte(callbackString), &ossCallback)
+		if err != nil {
+			LogService.Warming("Error occur while decode oss callback")
+		}
 
-		fmt.Println("OSS Callback Form ->")
-		fmt.Println(ctx.Request().Form)
-		var bodyBytes []byte
-		ctx.Request().Body.Read(bodyBytes)
-		fmt.Println("OSS Callback Body ->")
-		fmt.Println(string(bodyBytes))
-		//fmt.Println("OSS Callback Body Obj ->")
-		//fmt.Println(ctx.Request().GetBody)
-
-		//ctx.ResponseWriter().WriteHeader(http.StatusOK)  // response OK : 200
-		ctx.ResponseWriter().WriteString("{\"Status\":\"OK\"}")
+		LogService.Info("UserID=", ossCallback.UID, "Upload a File. Info =", ossCallback)
+		var responseStr = "{" +
+			"\"code\":200," +
+			"\"msg\":\"Success\"," +
+			"\"Status\":\"OK\"," +
+			"\"file\":\""+ossCallback.File+"\"," +
+			"\"bucket\":\""+ossCallback.Bucket+"\"" +
+			"}"
+		ctx.ResponseWriter().WriteString(responseStr)
 	} else {
 		ctx.ResponseWriter().WriteHeader(http.StatusBadRequest) // response FAILED : 400
 	}
@@ -124,11 +138,20 @@ func getOSSExpireTime() int64 {
 }
 
 const GetSignatureQueryParamsAction_CreateStickerPlainImage = "create_sticker_plain_image"
+const GetSignatureQueryParamsAction_CreateStickerPlainSound = "create_sticker_plain_sound"
+const GetSignatureQueryParamsAction_SetAvatar = "set_avatar"
 func getUploadDirectoryPath(ctx iris.Context, queryParams GetSignatureQueryParams) string {
 	accountResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)
+	dateTime := time.Now()
+	year := dateTime.Year()
+	month := dateTime.Format("01")
+
 	switch queryParams.Action {
+	case GetSignatureQueryParamsAction_CreateStickerPlainSound:
 	case GetSignatureQueryParamsAction_CreateStickerPlainImage:
-		return "sticker_board/user/"+accountResult.AccountID+"/sticker/plain_image/"
+		return "sticker_board/user/"+accountResult.AccountID+"/sticker/"+strconv.Itoa(year)+"/"+month+"/"
+	case GetSignatureQueryParamsAction_SetAvatar:
+		return "sticker_board/user/"+accountResult.AccountID+"/info/"
 	}
 	return ""
 }
@@ -193,26 +216,20 @@ func get_policy_token(ctx iris.Context, ossDirectoryPath string) string {
 	// https://help.aliyun.com/document_detail/31989.htm?spm=a2c4g.11186623.0.0.1e8d54586XMtFd#reference-zkm-311-hgb
 	var callbackParam CallbackParam
 	callbackParam.CallbackUrl = getOSSCallbackHost()
-	//callbackParam.CallbackBody = "bucket=${bucket}&etag=${etag}&filename=${object}&size=${size}&mimeType=${mimeType}&imgHeight=${imageInfo.height}&imgWidth=${imageInfo.width}&imgFormat=${imageInfo.format}"
-	//callbackParam.CallbackBody = "filename=${object}&size=${size}&mimeType=${mimeType}"
 
 	callbackParam.CallbackHost = OSSAlicloud.Endpoint
-	callbackParam.CallbackBody = "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}"
-	callbackParam.CallbackBodyType = "application/x-www-form-urlencoded"
-
-	//type CallbackParams struct {
-	//	MIMEType string `json:"mimeType"`
-	//	Size string `json:"size"`
-	//}
-	//callbackParamsMarshal, err := json.Marshal(CallbackParams{
-	//	Size: "${size}",
-	//	MIMEType: "${mimeType}",
-	//})
-	//callbackParam.CallbackBodyType = "application/json"
-	//callbackParam.CallbackBody = string(callbackParamsMarshal)
-	//
-	//callbackParam.CallbackBody = "{\"num1\":1251}"
-	//callbackParam.CallbackBodyType = "application/json"
+	callbackParam.CallbackBody = "{" +
+		"\"bucket\":${bucket}," +
+		"\"filename\":${object}," +
+		"\"etag\":${etag}," +
+		"\"size\":${size}," +
+		"\"mimeType\":${mimeType}," +
+		"\"height\":${imageInfo.height}," +
+		"\"width\":${imageInfo.width}," +
+		"\"format\":${imageInfo.format}," +
+		"\"uid\":\""+ ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx).AccountID +"\"" +
+		"}"
+	callbackParam.CallbackBodyType = "application/json"
 
 	callback_str,err:=json.Marshal(callbackParam)
 	if err != nil {
@@ -464,21 +481,23 @@ func unescapePath(s string, mode encoding) (string, error) {
 	return string(t), nil
 }
 
-func getMD5FromNewAuthString(r *http.Request) ([]byte, error) {
+func getMD5FromNewAuthString(r *http.Request) (string, []byte, error) {
+	var resultCallbackParams string
 	var byteMD5 []byte
 	// Construct the New Auth String from URI+Query+Body
 	bodyContent, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if (err != nil) {
 		fmt.Printf("Read Request Body failed : %s \n", err.Error())
-		return byteMD5, err
+		return resultCallbackParams, byteMD5, err
 	}
 	strCallbackBody := string(bodyContent)
+	resultCallbackParams = strCallbackBody
 	// fmt.Printf("r.URL.RawPath={%s}, r.URL.Query()={%s}, strCallbackBody={%s}\n", r.URL.RawPath, r.URL.Query(), strCallbackBody)
 	strURLPathDecode, errUnescape := unescapePath(r.URL.Path, encodePathSegment)  //url.PathUnescape(r.URL.Path) for Golang v1.8.2+
 	if (errUnescape != nil) {
 		fmt.Printf("url.PathUnescape failed : URL.Path=%s, error=%s \n", r.URL.Path, err.Error())
-		return byteMD5, errUnescape
+		return resultCallbackParams, byteMD5, errUnescape
 	}
 
 	// Generate New Auth String prepare for MD5
@@ -495,7 +514,7 @@ func getMD5FromNewAuthString(r *http.Request) ([]byte, error) {
 	md5Ctx.Write([]byte(strAuth))
 	byteMD5 = md5Ctx.Sum(nil)
 
-	return byteMD5, nil
+	return resultCallbackParams, byteMD5, nil
 }
 
 func verifySignature(bytePublicKey []byte, byteMd5 []byte, authorization []byte) bool {
