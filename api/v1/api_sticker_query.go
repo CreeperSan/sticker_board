@@ -3,7 +3,9 @@ package ApiV1
 import (
 	"github.com/kataras/iris/v12"
 	ApiMiddleware "sticker_board/api/middleware"
+	OSSAlicloud "sticker_board/application/oss_alicloud"
 	StickerModule "sticker_board/sticker/manager"
+	StickerModuleModel "sticker_board/sticker/manager/model"
 )
 
 func InitializeQuery(app *iris.Application)  {
@@ -53,6 +55,17 @@ func querySticker(ctx iris.Context){
 		return
 	}
 
+	// Format oss path to HTTP URL
+	for index, tmpSticker := range queryResult.Stickers {
+		switch tmpSticker.(type) {
+		case StickerModuleModel.StickerPlainImageModel:
+			var sticker = tmpSticker.(StickerModuleModel.StickerPlainImageModel)
+			sticker.Url = "https://" + OSSAlicloud.BucketName + "." + OSSAlicloud.Endpoint + "/" + sticker.Url
+			queryResult.Stickers[index] = sticker
+		}
+	}
+
+	// Response
 	ctx.JSON(ResponseParams{
 		Code: queryResult.Code,
 		Message: queryResult.Message,
