@@ -16,6 +16,7 @@ func Initialize()  {
 	ApiV1.InitializeStickerCommon(app)
 	ApiV1.InitializeStickerPlainText(app)
 	ApiV1.InitializeStickerPlainImage(app)
+	ApiV1.InitializeStickerPlainSound(app)
 	ApiV1.InitializeQuery(app)
 	ApiV1.InitializeOSS(app)
 
