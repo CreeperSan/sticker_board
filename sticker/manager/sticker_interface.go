@@ -1,6 +1,9 @@
 package StickerModule
 
-import StickerModuleResponse "sticker_board/sticker/manager/response"
+import (
+	StickerModuleModel "sticker_board/sticker/manager/model"
+	StickerModuleResponse "sticker_board/sticker/manager/response"
+)
 
 type StickerInterface interface {
 
@@ -64,6 +67,19 @@ type StickerInterface interface {
 		soundUrl string,
 		soundDescription string,
 		soundDuration int,
+	) StickerModuleResponse.StickerSingleResponse
+
+	CreateTodoListSticker(
+		accountID string,
+		star int,
+		isPinned bool,
+		stickerStatus int,
+		title string,
+		background string,
+		tagIDs []string,
+		categoryID string,
+		description string,
+		todos []StickerModuleModel.StickerTodoListItemModel,
 	) StickerModuleResponse.StickerSingleResponse
 
 	DeleteSticker(accountID string, stickerID string) StickerModuleResponse.StickerResponse

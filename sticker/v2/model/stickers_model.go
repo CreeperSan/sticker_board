@@ -29,4 +29,16 @@ type StickerDatabaseModel struct {
 	PlainSoundUrl         string `bson:"plain_sound_url"`
 	PlainSoundDescription string `bson:"plain_sound_description"`
 	PlainSoundDuration    int    `bson:"plain_sound_duration"`
+
+	// Type = Todo List
+	TodoListDescription string           `bson:"todo_list_description"`
+	TodoListAction      []TodoListAction `bson:"todo_list_action"`
+}
+
+// For Todo List
+type TodoListAction struct {
+	Order       bool   `bson:"order"` // stick to top of items
+	State       int    `bson:"state"` // 0 = not Finish, 1 = Finish
+	Message     string `bson:"message"`
+	Description string `bson:"description"`
 }
