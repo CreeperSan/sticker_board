@@ -18,7 +18,6 @@ func InitializeTodoListSticker(app *iris.Application){
 
 func createTodoListSticker(ctx iris.Context){
 	type RequestParamTodoItem struct {
-		Order       bool   `json:"order"` // stick to top of items
 		State       int    `json:"state"` // 0 = not Finish, 1 = Finish
 		Message     string `json:"message"`
 		Description string `json:"description"`
@@ -58,7 +57,6 @@ func createTodoListSticker(ctx iris.Context){
 	var todoSlice []StickerModuleModel.StickerTodoListItemModel
 	for _, todoItem := range requestParams.Todos {
 		todoSlice = append(todoSlice, StickerModuleModel.StickerTodoListItemModel{
-			Order: todoItem.Order,
 			State: todoItem.State,
 			Message: todoItem.Message,
 			Description: todoItem.Description,

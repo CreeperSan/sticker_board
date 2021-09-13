@@ -37,7 +37,6 @@ type StickerDatabaseModel struct {
 
 // For Todo List
 type TodoListAction struct {
-	Order       bool   `bson:"order"` // stick to top of items
 	State       int    `bson:"state"` // 0 = not Finish, 1 = Finish
 	Message     string `bson:"message"`
 	Description string `bson:"description"`

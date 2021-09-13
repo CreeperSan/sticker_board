@@ -39,7 +39,6 @@ func (operator *StickerOperator) CreateTodoListSticker(
 	var todoListAction []StickerV2Model.TodoListAction
 	for _, todoItems := range todos {
 		todoListAction = append(todoListAction, StickerV2Model.TodoListAction{
-			Order:       todoItems.Order,
 			State:       todoItems.State,
 			Message:     todoItems.Message,
 			Description: todoItems.Description,
