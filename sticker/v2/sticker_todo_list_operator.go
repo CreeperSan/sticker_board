@@ -49,7 +49,7 @@ func (operator *StickerOperator) CreateTodoListSticker(
 	currentMillisecond := Formatter.CurrentTimestampMillisecond()
 	insertSticker := StickerV2Model.StickerDatabaseModel{
 		ID:                  primitive.NewObjectID(),
-		Type:                StickerModuleConst.StickerTypePlainImage,
+		Type:                StickerModuleConst.StickerTypeTodoList,
 		AccountID:           accountID,
 		Star:                star,
 		IsPinned:            isPinned,

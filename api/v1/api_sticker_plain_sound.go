@@ -8,7 +8,7 @@ import (
 )
 
 func InitializeStickerPlainSound(app *iris.Application) {
-	stickerPlainText := app.Party("api/sticker/v1/plain_image")
+	stickerPlainText := app.Party("api/sticker/v1/plain_sound")
 
 	stickerPlainText.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerPlainText.Use(ApiMiddleware.AuthAccountMiddleware)

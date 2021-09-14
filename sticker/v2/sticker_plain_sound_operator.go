@@ -39,7 +39,7 @@ func (operator *StickerOperator) CreatePlainSoundSticker(
 	currentMillisecond := Formatter.CurrentTimestampMillisecond()
 	insertSticker := StickerV2Model.StickerDatabaseModel{
 		ID:                    primitive.NewObjectID(),
-		Type:                  StickerModuleConst.StickerTypePlainText,
+		Type:                  StickerModuleConst.StickerTypePlainSound,
 		AccountID:             accountID,
 		Star:                  star,
 		IsPinned:              isPinned,

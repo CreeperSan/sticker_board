@@ -67,8 +67,8 @@ type OSSRequestCallback struct {
 	ETag        string `json:"etag"`
 	Size        int    `json:"size"`
 	MIMEType    string `json:"mimeType"`
-	ImageHeight int    `json:"height"`
-	ImageWidth  int    `json:"width"`
+	ImageHeight string `json:"height"`
+	ImageWidth  string `json:"width"`
 	ImageFormat string `json:"format"`
 	UID         string `json:"uid"`
 }
@@ -147,8 +147,8 @@ func getUploadDirectoryPath(ctx iris.Context, queryParams GetSignatureQueryParam
 	month := dateTime.Format("01")
 
 	switch queryParams.Action {
-	case GetSignatureQueryParamsAction_CreateStickerPlainSound:
-	case GetSignatureQueryParamsAction_CreateStickerPlainImage:
+	case GetSignatureQueryParamsAction_CreateStickerPlainImage,
+		 GetSignatureQueryParamsAction_CreateStickerPlainSound:
 		return "sticker_board/user/"+accountResult.AccountID+"/sticker/"+strconv.Itoa(year)+"/"+month+"/"
 	case GetSignatureQueryParamsAction_SetAvatar:
 		return "sticker_board/user/"+accountResult.AccountID+"/info/"
@@ -224,8 +224,8 @@ func get_policy_token(ctx iris.Context, ossDirectoryPath string) string {
 		"\"etag\":${etag}," +
 		"\"size\":${size}," +
 		"\"mimeType\":${mimeType}," +
-		"\"height\":${imageInfo.height}," +
-		"\"width\":${imageInfo.width}," +
+		"\"height\":\"${imageInfo.height}\"," +
+		"\"width\":\"${imageInfo.width}\"," +
 		"\"format\":${imageInfo.format}," +
 		"\"uid\":\""+ ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx).AccountID +"\"" +
 		"}"
