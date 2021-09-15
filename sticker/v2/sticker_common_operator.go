@@ -122,6 +122,22 @@ func (operator *StickerOperator) FindSticker (accountID string, page int, pageSi
 			})
 			break
 		}
+		case StickerModuleConst.StickerTypeTodoList:{
+			var todoItemList []StickerModuleModel.StickerTodoListItemModel
+			for _, todoAction := range databaseModel.TodoListAction {
+				todoItemList = append(todoItemList, StickerModuleModel.StickerTodoListItemModel{
+					State: todoAction.State,
+					Message: todoAction.Message,
+					Description: todoAction.Description,
+				})
+			}
+			stickerModelArray = append(stickerModelArray, StickerModuleModel.StickerTodoListModel{
+				StickerBasicModel : basicModel,
+				Todos: todoItemList,
+				Description: databaseModel.TodoListDescription,
+			})
+			break
+		}
 		}
 	}
 	return StickerModuleResponse.StickerArrayResponse{
