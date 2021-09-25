@@ -30,7 +30,8 @@ type StickerInterface interface {
 
 	// Sticker
 
-	CreatePlainTextSticker(
+	CreateOrUpdatePlainTextSticker(
+		updateStickerID string,
 		accountID string,
 		star int,
 		isPinned bool,

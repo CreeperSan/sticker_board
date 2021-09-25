@@ -12,11 +12,13 @@ func InitializeStickerPlainText(app *iris.Application)  {
 	stickerPlainText.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerPlainText.Use(ApiMiddleware.AuthAccountMiddleware)
 
-	stickerPlainText.Post("/create", createPlainTextSticker)
+	stickerPlainText.Post("/create", createOrUpdatePlainTextSticker)
+	stickerPlainText.Post("/update", createOrUpdatePlainTextSticker)
 }
 
-func createPlainTextSticker(ctx iris.Context){
+func createOrUpdatePlainTextSticker(ctx iris.Context){
 	type RequestParams struct {
+		StickerID string `json:"sticker_id"`
 		Star int `json:"star"`
 		Status int `json:"status"`
 		Title string `json:"title"`
@@ -45,7 +47,8 @@ func createPlainTextSticker(ctx iris.Context){
 		return
 	}
 
-	createResult := StickerModule.GetOperator().CreatePlainTextSticker(
+	createResult := StickerModule.GetOperator().CreateOrUpdatePlainTextSticker(
+		requestParams.StickerID,
 		authResult.AccountID,
 		requestParams.Star,
 		requestParams.IsPinned,

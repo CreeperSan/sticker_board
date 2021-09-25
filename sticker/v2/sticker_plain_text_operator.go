@@ -13,7 +13,8 @@ import (
 	StickerV2Model "sticker_board/sticker/v2/model"
 )
 
-func (operator *StickerOperator) CreatePlainTextSticker(
+func (operator *StickerOperator) CreateOrUpdatePlainTextSticker(
+	updateStickerID string,
 	accountID string,
 	star int,
 	isPinned bool,
@@ -34,7 +35,7 @@ func (operator *StickerOperator) CreatePlainTextSticker(
 		}
 	}
 
-	// 2. Write a new plain text sticker to database
+	// 2. Write or update a new plain text sticker to database
 	currentMillisecond := Formatter.CurrentTimestampMillisecond()
 	insertSticker := StickerV2Model.StickerDatabaseModel{
 		ID:         primitive.NewObjectID(),
@@ -53,23 +54,54 @@ func (operator *StickerOperator) CreatePlainTextSticker(
 		CategoryID: categoryID,
 		PlainText:  text,
 	}
-	_, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).InsertOne(context.TODO(), bson.M{
-		"_id":         insertSticker.ID,
-		"type":        insertSticker.Type,
-		"account_id":  insertSticker.AccountID,
-		"star":        insertSticker.Star,
-		"is_pinned":   insertSticker.IsPinned,
-		"status":      insertSticker.Status,
-		"title":       insertSticker.Title,
-		"background":  insertSticker.Background,
-		"create_time": insertSticker.CreateTime,
-		"update_time": insertSticker.UpdateTime,
-		"search_text": insertSticker.SearchText,
-		"sort":        insertSticker.Sort,
-		"tags":        insertSticker.TagIDs,
-		"category":    insertSticker.CategoryID,
-		"plain_text":  insertSticker.PlainText,
-	})
+	var err error
+	if len(updateStickerID) > 0 {
+		// Update sticker
+		stickerID, errParseID := primitive.ObjectIDFromHex(updateStickerID)
+		if errParseID != nil {
+			return StickerModuleResponse.StickerSingleResponse{
+				StickerResponse: StickerModuleResponse.CreateInternalErrorResponseWithMessage(
+					"Error while Updating plain text sticker",
+				),
+			}
+		}
+		_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).UpdateOne(context.TODO(), bson.M{
+			"_id":         stickerID,
+		},bson.M{
+			"$set" : bson.M{
+				"star":        insertSticker.Star,
+				"is_pinned":   insertSticker.IsPinned,
+				"status":      insertSticker.Status,
+				"title":       insertSticker.Title,
+				"background":  insertSticker.Background,
+				"update_time": insertSticker.UpdateTime,
+				"search_text": insertSticker.SearchText,
+				"sort":        insertSticker.Sort,
+				"tags":        insertSticker.TagIDs,
+				"category":    insertSticker.CategoryID,
+				"plain_text":  insertSticker.PlainText,
+			},
+		})
+	} else {
+		// Create sticker
+		_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).InsertOne(context.TODO(), bson.M{
+			"_id":         insertSticker.ID,
+			"type":        insertSticker.Type,
+			"account_id":  insertSticker.AccountID,
+			"star":        insertSticker.Star,
+			"is_pinned":   insertSticker.IsPinned,
+			"status":      insertSticker.Status,
+			"title":       insertSticker.Title,
+			"background":  insertSticker.Background,
+			"create_time": insertSticker.CreateTime,
+			"update_time": insertSticker.UpdateTime,
+			"search_text": insertSticker.SearchText,
+			"sort":        insertSticker.Sort,
+			"tags":        insertSticker.TagIDs,
+			"category":    insertSticker.CategoryID,
+			"plain_text":  insertSticker.PlainText,
+		})
+	}
 	if err != nil {
 		return StickerModuleResponse.StickerSingleResponse{
 			StickerResponse: StickerModuleResponse.CreateInternalErrorResponseWithMessage(
