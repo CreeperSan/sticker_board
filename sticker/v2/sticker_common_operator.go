@@ -43,7 +43,13 @@ func (operator *StickerOperator) DeleteSticker(accountID string, stickerID strin
 	return StickerModuleResponse.CreateSuccessResponse()
 }
 
-func (operator *StickerOperator) FindSticker (accountID string, page int, pageSize int) StickerModuleResponse.StickerArrayResponse {
+func (operator *StickerOperator) FindSticker (
+	accountID string,
+	page int,
+	pageSize int,
+	category []string,
+	tag []string,
+) StickerModuleResponse.StickerArrayResponse {
 	// 1. Check whether this account is exist
 	checkResult := AccountModule.GetOperator().IsAccountExist(accountID)
 	if !checkResult.IsSuccess() {
@@ -54,14 +60,22 @@ func (operator *StickerOperator) FindSticker (accountID string, page int, pageSi
 		}
 	}
 
+	// 1.5 Generate query params
+	var queryCondition = bson.M{}
+	queryCondition["account_id"] = accountID
+	if len(category) > 0 {
+		queryCondition["category"] = bson.M{ "$in" : category }
+	}
+	if len(tag) > 0 {
+		queryCondition["tag"] = bson.M{ "$in" : tag }
+	}
+
 	// 2. Find sticker in database
  	var pSkip int64
  	var pLimit int64
 	pSkip = int64(page * pageSize)
 	pLimit = int64(pageSize)
-	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).Find(context.TODO(), bson.M{
-		"account_id": accountID,
-	}, &options.FindOptions{
+	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).Find(context.TODO(), queryCondition, &options.FindOptions{
 		Skip:  &pSkip,
 		Limit: &pLimit,
 	})

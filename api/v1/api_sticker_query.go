@@ -19,8 +19,10 @@ func InitializeQuery(app *iris.Application)  {
 
 func querySticker(ctx iris.Context){
 	type RequestParams struct {
-		Page      int    `json:"page"`
-		PageSize  int    `json:"page_size"`
+		Page     int      `json:"page"`
+		PageSize int      `json:"page_size"`
+		Category []string `json:"category"`
+		Tag      []string `json:"tag"`
 	}
 	type ResponseParams struct {
 		Code    int           `json:"code"`
@@ -45,6 +47,8 @@ func querySticker(ctx iris.Context){
 		authResult.AccountID,
 		requestParams.Page,
 		requestParams.PageSize,
+		requestParams.Category,
+		requestParams.Tag,
 	)
 
 	if !queryResult.IsSuccess() {

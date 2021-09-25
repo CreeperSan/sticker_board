@@ -84,7 +84,13 @@ type StickerInterface interface {
 
 	DeleteSticker(accountID string, stickerID string) StickerModuleResponse.StickerResponse
 
-	FindSticker(accountID string, page int, pageSize int) StickerModuleResponse.StickerArrayResponse
+	FindSticker(
+		accountID string,
+		page int,
+		pageSize int,
+		category []string,
+		tag []string,
+	) StickerModuleResponse.StickerArrayResponse
 
 }
 
