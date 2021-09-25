@@ -96,6 +96,8 @@ func (operator *StickerOperator) FindSticker (accountID string, page int, pageSi
 			Background: databaseModel.Background,
 			CreateTime: databaseModel.CreateTime,
 			UpdateTime: databaseModel.UpdateTime,
+			CategoryModel: databaseModel.CategoryID,
+			TagModelArray: databaseModel.TagIDs,
 		}
 		switch databaseModel.Type {
 		case StickerModuleConst.StickerTypePlainText:{
