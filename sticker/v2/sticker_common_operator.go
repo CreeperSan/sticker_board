@@ -67,7 +67,7 @@ func (operator *StickerOperator) FindSticker (
 		queryCondition["category"] = bson.M{ "$in" : category }
 	}
 	if len(tag) > 0 {
-		queryCondition["tag"] = bson.M{ "$in" : tag }
+		queryCondition["tags"] = bson.M{ "$in" : tag }
 	}
 
 	// 2. Find sticker in database
