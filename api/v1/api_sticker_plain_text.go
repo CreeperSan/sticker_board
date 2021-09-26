@@ -18,20 +18,20 @@ func InitializeStickerPlainText(app *iris.Application)  {
 
 func createOrUpdatePlainTextSticker(ctx iris.Context){
 	type RequestParams struct {
-		StickerID string `json:"sticker_id"`
-		Star int `json:"star"`
-		Status int `json:"status"`
-		Title string `json:"title"`
-		Background string `json:"background"`
-		Text string `json:"text"`
-		CategoryID string `json:"category_id"`
-		TagID []string `json:"tag_id"`
-		IsPinned bool `json:"is_pinned"`
+		StickerID  string   `json:"sticker_id"`
+		Star       int      `json:"star"`
+		Status     int      `json:"status"`
+		Title      string   `json:"title"`
+		Background string   `json:"background"`
+		Text       string   `json:"text"`
+		CategoryID string   `json:"category_id"`
+		TagID      []string `json:"tag_id"`
+		IsPinned   bool     `json:"is_pinned"`
 	}
 	type ResponseParams struct {
-		Code    int    `json:"code"`
-		Message string `json:"msg"`
-		Data interface{} `json:"data"`
+		Code    int         `json:"code"`
+		Message string      `json:"msg"`
+		Data    interface{} `json:"data"`
 	}
 
 	authResult := ApiMiddleware.AuthAccountMiddleWareGetResponse(ctx)

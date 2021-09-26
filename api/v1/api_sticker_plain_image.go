@@ -13,11 +13,13 @@ func InitializeStickerPlainImage(app *iris.Application)  {
 	stickerPlainText.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerPlainText.Use(ApiMiddleware.AuthAccountMiddleware)
 
-	stickerPlainText.Post("/create", createPlainImageSticker)
+	stickerPlainText.Post("/create", createOrUpdatePlainImageSticker)
+	stickerPlainText.Post("/update", createOrUpdatePlainImageSticker)
 }
 
-func createPlainImageSticker(ctx iris.Context){
+func createOrUpdatePlainImageSticker(ctx iris.Context){
 	type RequestParams struct {
+		StickerID        string   `json:"sticker_id"`
 		Star             int      `json:"star"`
 		Status           int      `json:"status"`
 		Title            string   `json:"title"`
@@ -59,7 +61,8 @@ func createPlainImageSticker(ctx iris.Context){
 	LogService.Info("Request Params : ", requestParams)
 
 	// Extract file from form request
-	createResult := StickerModule.GetOperator().CreatePlainImageSticker(
+	createResult := StickerModule.GetOperator().CreateOrUpdatePlainImageSticker(
+		requestParams.StickerID,
 		authResult.AccountID,
 		requestParams.Star,
 		requestParams.IsPinned,

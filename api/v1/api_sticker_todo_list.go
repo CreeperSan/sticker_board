@@ -13,26 +13,28 @@ func InitializeTodoListSticker(app *iris.Application){
 	stickerTodoList.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerTodoList.Use(ApiMiddleware.AuthAccountMiddleware)
 
-	stickerTodoList.Post("/create", createTodoListSticker)
+	stickerTodoList.Post("/create", createOrUpdateTodoListSticker)
+	stickerTodoList.Post("/update", createOrUpdateTodoListSticker)
 }
 
-func createTodoListSticker(ctx iris.Context){
+func createOrUpdateTodoListSticker(ctx iris.Context){
 	type RequestParamTodoItem struct {
 		State       int    `json:"state"` // 0 = not Finish, 1 = Finish
 		Message     string `json:"message"`
 		Description string `json:"description"`
 	}
 	type RequestParams struct {
-		Star int `json:"star"`
-		Status int `json:"status"`
-		Title string `json:"title"`
-		Background string `json:"background"`
-		Text string `json:"text"`
-		CategoryID string `json:"category_id"`
-		TagID []string `json:"tag_id"`
-		IsPinned bool `json:"is_pinned"`
-		Description string `json:"description"`
-		Todos []RequestParamTodoItem `json:"todos"`
+		StickerID   string                 `json:"sticker_id"`
+		Star        int                    `json:"star"`
+		Status      int                    `json:"status"`
+		Title       string                 `json:"title"`
+		Background  string                 `json:"background"`
+		Text        string                 `json:"text"`
+		CategoryID  string                 `json:"category_id"`
+		TagID       []string               `json:"tag_id"`
+		IsPinned    bool                   `json:"is_pinned"`
+		Description string                 `json:"description"`
+		Todos       []RequestParamTodoItem `json:"todos"`
 	}
 	type ResponseParams struct {
 		Code    int         `json:"code"`
@@ -63,7 +65,8 @@ func createTodoListSticker(ctx iris.Context){
 		})
 	}
 
-	createResult := StickerModule.GetOperator().CreateTodoListSticker(
+	createResult := StickerModule.GetOperator().CreateOrUpdateTodoListSticker(
+		requestParams.StickerID,
 		authResult.AccountID,
 		requestParams.Star,
 		requestParams.IsPinned,

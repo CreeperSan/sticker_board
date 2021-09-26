@@ -12,7 +12,8 @@ import (
 	StickerV2Model "sticker_board/sticker/v2/model"
 )
 
-func (operator *StickerOperator) CreatePlainSoundSticker(
+func (operator *StickerOperator) CreateOrUpdatePlainSoundSticker(
+	updateStickerID string,
 	accountID string,
 	star int,
 	isPinned bool,
@@ -56,25 +57,59 @@ func (operator *StickerOperator) CreatePlainSoundSticker(
 		PlainSoundDescription: soundDescription,
 		PlainSoundDuration:    soundDuration,
 	}
-	_, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).InsertOne(context.TODO(), bson.M{
-		"_id":                     insertSticker.ID,
-		"type":                    insertSticker.Type,
-		"account_id":              insertSticker.AccountID,
-		"star":                    insertSticker.Star,
-		"is_pinned":               insertSticker.IsPinned,
-		"status":                  insertSticker.Status,
-		"title":                   insertSticker.Title,
-		"background":              insertSticker.Background,
-		"create_time":             insertSticker.CreateTime,
-		"update_time":             insertSticker.UpdateTime,
-		"search_text":             insertSticker.SearchText,
-		"sort":                    insertSticker.Sort,
-		"tags":                    insertSticker.TagIDs,
-		"category":                insertSticker.CategoryID,
-		"plain_sound_url":         insertSticker.PlainSoundUrl,
-		"plain_sound_description": insertSticker.PlainSoundDescription,
-		"plain_sound_duration":    insertSticker.PlainSoundDuration,
-	})
+
+	var err error
+	if len(updateStickerID) > 0 {
+		// Update Sticker
+		stickerID, errParseID := primitive.ObjectIDFromHex(updateStickerID)
+		if errParseID != nil {
+			return StickerModuleResponse.StickerSingleResponse{
+				StickerResponse: StickerModuleResponse.CreateInternalErrorResponseWithMessage(
+					"Error while Updating plain sound sticker",
+				),
+			}
+		}
+		_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).UpdateOne(context.TODO(), bson.M{
+			"_id":         stickerID,
+		},bson.M{
+			"$set": bson.M{
+				"star":                    insertSticker.Star,
+				"is_pinned":               insertSticker.IsPinned,
+				"status":                  insertSticker.Status,
+				"title":                   insertSticker.Title,
+				"background":              insertSticker.Background,
+				"update_time":             insertSticker.UpdateTime,
+				"search_text":             insertSticker.SearchText,
+				"sort":                    insertSticker.Sort,
+				"tags":                    insertSticker.TagIDs,
+				"category":                insertSticker.CategoryID,
+				"plain_sound_url":         insertSticker.PlainSoundUrl,
+				"plain_sound_description": insertSticker.PlainSoundDescription,
+				"plain_sound_duration":    insertSticker.PlainSoundDuration,
+			},
+		})
+	} else {
+		// Create Sticker
+		_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).InsertOne(context.TODO(), bson.M{
+			"_id":                     insertSticker.ID,
+			"type":                    insertSticker.Type,
+			"account_id":              insertSticker.AccountID,
+			"star":                    insertSticker.Star,
+			"is_pinned":               insertSticker.IsPinned,
+			"status":                  insertSticker.Status,
+			"title":                   insertSticker.Title,
+			"background":              insertSticker.Background,
+			"create_time":             insertSticker.CreateTime,
+			"update_time":             insertSticker.UpdateTime,
+			"search_text":             insertSticker.SearchText,
+			"sort":                    insertSticker.Sort,
+			"tags":                    insertSticker.TagIDs,
+			"category":                insertSticker.CategoryID,
+			"plain_sound_url":         insertSticker.PlainSoundUrl,
+			"plain_sound_description": insertSticker.PlainSoundDescription,
+			"plain_sound_duration":    insertSticker.PlainSoundDuration,
+		})
+	}
 	if err != nil {
 		return StickerModuleResponse.StickerSingleResponse{
 			StickerResponse: StickerModuleResponse.CreateInternalErrorResponseWithMessage(

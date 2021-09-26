@@ -12,7 +12,8 @@ import (
 	StickerV2Model "sticker_board/sticker/v2/model"
 )
 
-func (operator *StickerOperator) CreatePlainImageSticker(
+func (operator *StickerOperator) CreateOrUpdatePlainImageSticker(
+	updateStickerID string,
 	accountID string,
 	star int,
 	isPinned bool,
@@ -54,24 +55,57 @@ func (operator *StickerOperator) CreatePlainImageSticker(
 		PlainImageUrl:         imageUrl,
 		PlainImageDescription: imageDescription,
 	}
-	_, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).InsertOne(context.TODO(), bson.M{
-		"_id":                     insertSticker.ID,
-		"type":                    insertSticker.Type,
-		"account_id":              insertSticker.AccountID,
-		"star":                    insertSticker.Star,
-		"is_pinned":               insertSticker.IsPinned,
-		"status":                  insertSticker.Status,
-		"title":                   insertSticker.Title,
-		"background":              insertSticker.Background,
-		"create_time":             insertSticker.CreateTime,
-		"update_time":             insertSticker.UpdateTime,
-		"search_text":             insertSticker.SearchText,
-		"sort":                    insertSticker.Sort,
-		"tags":                    insertSticker.TagIDs,
-		"category":                insertSticker.CategoryID,
-		"plain_image_url":         insertSticker.PlainImageUrl,
-		"plain_image_description": insertSticker.PlainImageDescription,
-	})
+
+	var err error
+	if len(updateStickerID) > 0 {
+		// Update Sticker
+		stickerID, errParseID := primitive.ObjectIDFromHex(updateStickerID)
+		if errParseID != nil {
+			return StickerModuleResponse.StickerSingleResponse{
+				StickerResponse: StickerModuleResponse.CreateInternalErrorResponseWithMessage(
+					"Error while updating plain text sticker",
+				),
+			}
+		}
+		_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).UpdateOne(context.TODO(), bson.M{
+			"_id":         stickerID,
+		},bson.M{
+			"$set": bson.M{
+				"star":                    insertSticker.Star,
+				"is_pinned":               insertSticker.IsPinned,
+				"status":                  insertSticker.Status,
+				"title":                   insertSticker.Title,
+				"background":              insertSticker.Background,
+				"update_time":             insertSticker.UpdateTime,
+				"search_text":             insertSticker.SearchText,
+				"sort":                    insertSticker.Sort,
+				"tags":                    insertSticker.TagIDs,
+				"category":                insertSticker.CategoryID,
+				"plain_image_url":         insertSticker.PlainImageUrl,
+				"plain_image_description": insertSticker.PlainImageDescription,
+			},
+		})
+	} else {
+		// Create Sticker
+		_, err = ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).InsertOne(context.TODO(), bson.M{
+			"_id":                     insertSticker.ID,
+			"type":                    insertSticker.Type,
+			"account_id":              insertSticker.AccountID,
+			"star":                    insertSticker.Star,
+			"is_pinned":               insertSticker.IsPinned,
+			"status":                  insertSticker.Status,
+			"title":                   insertSticker.Title,
+			"background":              insertSticker.Background,
+			"create_time":             insertSticker.CreateTime,
+			"update_time":             insertSticker.UpdateTime,
+			"search_text":             insertSticker.SearchText,
+			"sort":                    insertSticker.Sort,
+			"tags":                    insertSticker.TagIDs,
+			"category":                insertSticker.CategoryID,
+			"plain_image_url":         insertSticker.PlainImageUrl,
+			"plain_image_description": insertSticker.PlainImageDescription,
+		})
+	}
 	if err != nil {
 		return StickerModuleResponse.StickerSingleResponse{
 			StickerResponse: StickerModuleResponse.CreateInternalErrorResponseWithMessage(

@@ -43,7 +43,8 @@ type StickerInterface interface {
 		text string,
 	) StickerModuleResponse.StickerSingleResponse
 
-	CreatePlainImageSticker(
+	CreateOrUpdatePlainImageSticker(
+		updateStickerID string,
 		accountID string,
 		star int,
 		isPinned bool,
@@ -56,7 +57,8 @@ type StickerInterface interface {
 		imageDescription string,
 	) StickerModuleResponse.StickerSingleResponse
 
-	CreatePlainSoundSticker(
+	CreateOrUpdatePlainSoundSticker(
+		updateStickerID string,
 		accountID string,
 		star int,
 		isPinned bool,
@@ -70,7 +72,8 @@ type StickerInterface interface {
 		soundDuration int,
 	) StickerModuleResponse.StickerSingleResponse
 
-	CreateTodoListSticker(
+	CreateOrUpdateTodoListSticker(
+		updateStickerID string,
 		accountID string,
 		star int,
 		isPinned bool,

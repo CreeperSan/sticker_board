@@ -13,11 +13,13 @@ func InitializeStickerPlainSound(app *iris.Application) {
 	stickerPlainText.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerPlainText.Use(ApiMiddleware.AuthAccountMiddleware)
 
-	stickerPlainText.Post("/create", createPlainSoundSticker)
+	stickerPlainText.Post("/create", createOrUpdatePlainSoundSticker)
+	stickerPlainText.Post("/update", createOrUpdatePlainSoundSticker)
 }
 
-func createPlainSoundSticker(ctx iris.Context) {
+func createOrUpdatePlainSoundSticker(ctx iris.Context) {
 	type RequestParams struct {
+		StickerID        string   `json:"sticker_id"`
 		Star             int      `json:"star"`
 		Status           int      `json:"status"`
 		Title            string   `json:"title"`
@@ -60,7 +62,8 @@ func createPlainSoundSticker(ctx iris.Context) {
 	LogService.Info("Request Params : ", requestParams)
 
 	// Extract file from form request
-	createResult := StickerModule.GetOperator().CreatePlainSoundSticker(
+	createResult := StickerModule.GetOperator().CreateOrUpdatePlainSoundSticker(
+		requestParams.StickerID,
 		authResult.AccountID,
 		requestParams.Star,
 		requestParams.IsPinned,
