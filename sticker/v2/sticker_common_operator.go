@@ -78,6 +78,9 @@ func (operator *StickerOperator) FindSticker (
 	cursor, err := ApplicationDB.MongoDB.Collection(ApplicationDB.CollectionSticker).Find(context.TODO(), queryCondition, &options.FindOptions{
 		Skip:  &pSkip,
 		Limit: &pLimit,
+		Sort: bson.D{
+			{ "update_time", -1 }, // 1 -> order,  -1 -> reverse order
+		},
 	})
 	if err != nil {
 		return StickerModuleResponse.StickerArrayResponse{
