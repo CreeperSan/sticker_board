@@ -6,6 +6,7 @@ import (
 	OSSAlicloud "sticker_board/application/oss_alicloud"
 	StickerModule "sticker_board/sticker/manager"
 	StickerModuleModel "sticker_board/sticker/manager/model"
+	"strings"
 )
 
 func InitializeQuery(app *iris.Application)  {
@@ -64,8 +65,18 @@ func querySticker(ctx iris.Context){
 		switch tmpSticker.(type) {
 		case StickerModuleModel.StickerPlainImageModel:
 			var sticker = tmpSticker.(StickerModuleModel.StickerPlainImageModel)
-			sticker.Url = "https://" + OSSAlicloud.BucketName + "." + OSSAlicloud.Endpoint + "/" + sticker.Url
+			if !strings.HasPrefix(sticker.Url, "http://") && !strings.HasPrefix(sticker.Url, "https://") {
+				sticker.Url = "https://" + OSSAlicloud.BucketName + "." + OSSAlicloud.Endpoint + "/" + sticker.Url
+			}
 			queryResult.Stickers[index] = sticker
+			break
+		case StickerModuleModel.StickerPlainSoundModel:
+			var sticker = tmpSticker.(StickerModuleModel.StickerPlainSoundModel)
+			if !strings.HasPrefix(sticker.Url, "http://") && !strings.HasPrefix(sticker.Url, "https://") {
+				sticker.Url = "https://" + OSSAlicloud.BucketName + "." + OSSAlicloud.Endpoint + "/" + sticker.Url
+			}
+			queryResult.Stickers[index] = sticker
+			break
 		}
 	}
 
