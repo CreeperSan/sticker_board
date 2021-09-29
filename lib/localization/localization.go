@@ -42,6 +42,9 @@ func GetText(bundleName string, key string) string {
 
 func TrText(bundleName string, key string, params ...interface{}) string {
 	var text = GetText(bundleName, key)
-	return fmt.Sprintf(text, params)
+	if len(params) > 0 {
+		return fmt.Sprintf(text, params...)
+	}
+	return text
 }
 
