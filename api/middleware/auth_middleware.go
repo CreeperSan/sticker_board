@@ -3,6 +3,7 @@ package ApiMiddleware
 import (
 	"github.com/kataras/iris/v12"
 	AccountModule "sticker_board/account/manager"
+	Localization "sticker_board/lib/localization"
 	"strconv"
 )
 
@@ -38,9 +39,10 @@ func AuthAccountMiddleware(ctx iris.Context) {
 
 	// if token auth error or token account id not the same as request header's uid
 	if !authTokenResult.IsSuccess() {
+		var hintMessage = Localization.TrText(LanguageMiddleWareGetResponse(ctx).Language, "account_expire_need_login")
 		ctx.JSON(ResponseParams{
 			Code: 401,
-			Message: "Login expired, please login in again",
+			Message: hintMessage,
 		})
 		return
 	}

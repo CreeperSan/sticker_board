@@ -10,6 +10,7 @@ import (
 func InitializeTodoListSticker(app *iris.Application){
 	stickerTodoList := app.Party("/api/sticker/v1/todo_list")
 
+	stickerTodoList.Use(ApiMiddleware.LanguageMiddleware)
 	stickerTodoList.Use(ApiMiddleware.AuthVersionMiddleware)
 	stickerTodoList.Use(ApiMiddleware.AuthAccountMiddleware)
 

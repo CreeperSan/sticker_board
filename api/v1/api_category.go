@@ -10,6 +10,7 @@ import (
 func InitializeCategory(app *iris.Application){
 	categoryApi := app.Party("/api/category/v1")
 
+	categoryApi.Use(ApiMiddleware.LanguageMiddleware)
 	categoryApi.Use(ApiMiddleware.AuthVersionMiddleware)
 	categoryApi.Use(ApiMiddleware.AuthAccountMiddleware)
 

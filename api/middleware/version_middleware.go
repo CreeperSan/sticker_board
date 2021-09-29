@@ -2,6 +2,7 @@ package ApiMiddleware
 
 import (
 	"github.com/kataras/iris/v12"
+	Localization "sticker_board/lib/localization"
 	"strconv"
 )
 
@@ -26,9 +27,10 @@ func AuthVersionMiddleware(ctx iris.Context) {
 	}
 
 	if versionCode <= 0 || platform <= 0 {
+		var hintMessage = Localization.TrText(LanguageMiddleWareGetResponse(ctx).Language, "version_out_of_date")
 		ctx.JSON(ResponseParams{
 			Code: 401,
-			Message: "Current application version is out of date, please update to newest version.",
+			Message: hintMessage,
 		})
 		return
 	}
