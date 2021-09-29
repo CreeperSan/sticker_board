@@ -38,7 +38,7 @@ func createTag(ctx iris.Context){
 	if err != nil {
 		ctx.JSON(ResponseParams{
 			Code: 406,
-			Message: "Params Error",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_params_error"),
 		})
 		return
 	}
@@ -53,7 +53,7 @@ func createTag(ctx iris.Context){
 	if !Formatter.CheckStringWithLength(requestParams.TagName, 1, 30) {
 		ctx.JSON(ResponseParams{
 			Code: 406,
-			Message: "Params Error",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_params_error"),
 		})
 	}
 
@@ -82,7 +82,7 @@ func deleteTag(ctx iris.Context){
 	if err != nil {
 		ctx.JSON(ResponseParams{
 			Code: 406,
-			Message: "Params Error",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_params_error"),
 		})
 		return
 	}
@@ -136,7 +136,7 @@ func queryTagList(ctx iris.Context){
 
 	ctx.JSON(ResponseParams{
 		Code: 200,
-		Message: "Success",
+		Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_operate_success"),
 		Data: dataList,
 	})
 }

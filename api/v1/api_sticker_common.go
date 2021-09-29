@@ -33,7 +33,7 @@ func deleteSticker(ctx iris.Context) {
 	if err != nil {
 		ctx.JSON(ResponseParams{
 			Code: 406,
-			Message: "Params Error",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_params_error"),
 		})
 		return
 	}
@@ -49,7 +49,7 @@ func deleteSticker(ctx iris.Context) {
 
 	ctx.JSON(&ResponseParams{
 		Code: 200,
-		Message: "Success",
+		Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_operate_success"),
 	})
 
 }

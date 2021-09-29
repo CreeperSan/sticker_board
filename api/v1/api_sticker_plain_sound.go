@@ -46,7 +46,7 @@ func createOrUpdatePlainSoundSticker(ctx iris.Context) {
 	if err != nil {
 		ctx.JSON(ResponseParams{
 			Code: 401,
-			Message: "Params Error",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_params_error"),
 		})
 		return
 	}
@@ -55,7 +55,7 @@ func createOrUpdatePlainSoundSticker(ctx iris.Context) {
 	if len(requestParams.SoundPath) <= 0 {
 		ctx.JSON(ResponseParams{
 			Code: 401,
-			Message: "Sound path is empty",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "sticker_plain_sound_url_empty"),
 		})
 		return
 	}

@@ -45,7 +45,7 @@ func createOrUpdatePlainImageSticker(ctx iris.Context){
 	if err != nil {
 		ctx.JSON(ResponseParams{
 			Code: 401,
-			Message: "Params Error",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "common_params_error"),
 		})
 		return
 	}
@@ -54,7 +54,7 @@ func createOrUpdatePlainImageSticker(ctx iris.Context){
 	if len(requestParams.ImagePath) <= 0 {
 		ctx.JSON(ResponseParams{
 			Code: 401,
-			Message: "Image path is empty",
+			Message: ApiMiddleware.LanguageMiddlewareTrText(ctx, "sticker_plain_image_url_empty"),
 		})
 		return
 	}
