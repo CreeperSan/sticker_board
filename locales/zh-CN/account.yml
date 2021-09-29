@@ -1,0 +1,4 @@
+login:
+  token_expire: "登陆信息过期，请重新登录"
+
+aaa: "啊啊啊"
